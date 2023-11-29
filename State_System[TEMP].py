@@ -33,7 +33,13 @@ def Solver(V0 : float, eta0 : float, h0 : float, t0 : float, t_end : float, g : 
     Vx0 , Vy0 = Get_VInit(V0, eta0)
     State0 = [Vx0, Vy0, h0]
 
-    param = (g, m, alpha, gamma, x_lst, y_lst) #doubt I can set array as a parameter
+    aoa = lambda t: alpha
+
+    param = (g, m, aoa, gamma, x_lst, y_lst) #doubt I can set array as a parameter
 
     sol = solve_ivp(StateUpdate,(t0,t_end) ,State0, param )
+
+    return sol
+
+print(Solver(3000, 3.5, 100000, 0, 100, 9.81, 100 , np.zeros(1000), 1.4, (-1,0,1), (0,0,0)))
 
