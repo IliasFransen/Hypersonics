@@ -6,4 +6,5 @@ from math import atan2
 def Get_Angles(Vx: float, Vy: float, alpha: float):
     Beta = atan2(Vy, Vx)
     eta = Beta - alpha
-    return Beta, alpha
+    return Beta, eta
+

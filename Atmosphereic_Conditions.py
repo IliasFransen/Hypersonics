@@ -12,4 +12,5 @@ def Get_SoundSpeed (h: float):
 
 def Get_Density(h: float):
     rho = atmos(h).density
-    return rho
+    return float(rho)
+
