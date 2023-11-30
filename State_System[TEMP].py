@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import solve_ivp
+from scipy.integrate import odeint
 from FBD_Stuff import Get_Angles
 from Modified_Newton import Get_Normal, Get_Tangential
 
@@ -8,9 +8,9 @@ from Modified_Newton import Get_Normal, Get_Tangential
 def StateUpdate(t : list, states: list, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
     Vx, Vy, h = states
 
-    eta = Get_Angles(Vx, Vy, alpha)
-    N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
-    T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
+    eta = Get_Angles(Vx, Vy, alpha(t))
+    N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha(t))
+    T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha(t))
 
     dVxdt = N*np.cos(eta-np.pi)/m + T*np.cos(eta-np.pi*0.5)/m
     dVydt = -g + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
@@ -30,17 +30,17 @@ def Get_VInit (V0 : float, beta0 : float):
     return Vx0, Vy0
 
 
-def Solver(V0 : float, beta0 : float, h0 : float, t0 : float, t_end : float, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
+def Solver(V0 : float, beta0 : float, h0 : float, t: list, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
     Vx0 , Vy0 = Get_VInit(V0, beta0)
     State0 = [Vx0, Vy0, h0]
 
-    aoa = lambda t: alpha
+    param = (g, m, alpha, gamma, x_lst, y_lst) #doubt I can set array as a parameter
 
-    param = (g, m, aoa, gamma, x_lst, y_lst) #doubt I can set array as a parameter
-
-    sol = solve_ivp(StateUpdate,(t0,t_end) ,State0, param )
+    sol = odeint(StateUpdate,State0 , t, param )
 
     return sol
 
-print(Solver(3000, 3.5, 100000, 0, 100, 9.81, 100 , np.zeros(1000), 1.4, (-1,0,1), (0,0,0)))
+
+#TEST
+print(Solver(10000, 3.25, 100000, [0,1,2,3,4,5,6,7,8,9], 9.81, 1000, [0,0,0,0,0,0,0,0,0,0], 1.4, [-1,0,1], [0,0,0]))
 
