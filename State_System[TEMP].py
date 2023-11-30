@@ -5,7 +5,7 @@ from Modified_Newton import Get_Normal, Get_Tangential
 
 #StateUpdate is gives the system of differential equations that needs to be S
 
-def StateUpdate(t : list, states: list, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
+def StateUpdate( states: list, t : list,g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
     Vx, Vy, h = states
 
     eta = Get_Angles(Vx, Vy, alpha(t))
@@ -36,7 +36,7 @@ def Solver(V0 : float, beta0 : float, h0 : float, t: list, g : float, m : float,
 
     param = (g, m, alpha, gamma, x_lst, y_lst) #doubt I can set array as a parameter
 
-    sol = odeint(StateUpdate,State0 , t, param )
+    sol = odeint(StateUpdate,State0 , t, args=(param) )
 
     return sol
 
