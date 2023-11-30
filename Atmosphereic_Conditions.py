@@ -1,18 +1,19 @@
 import numpy as np
-import isacalc as isa
+import fluids.atmosphere as isa
 
 #Get_SoundSpeed takes the altitude in meters as a float and returns the speed of sound at said altitude in meters per second
 
 def Get_SoundSpeed (h: float):
-    atmosphere = isa.get_atmosphere()
-    T, P, d, a, mu = isa.calculate_at_h(h, atmosphere)
+    
+    properies = isa.ATMOSPHERE_1976(h, dT=0.0)
+    a = (287*1.4*properies.T)**0.5
     return float(a)
 
 
 #Get_Density gives the density at a certain altitiude
 
 def Get_Density(h: float):
-    atmosphere = isa.get_atmosphere()
-    T, P, rho, a, mu = isa.calculate_at_h(h, atmosphere)
+    properies = isa.ATMOSPHERE_1976(h, dT=0.0)
+    rho = properies.rho
     return float(rho)
 
