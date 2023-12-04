@@ -193,7 +193,7 @@ if __name__ == '__main__':
     do_plot(
         'downrange (km)', downrange / 1e3,
         'altitude (km)', alt / 1e3,
-        label, title, '%s-traj.png' % craft['name']/
+        label, title, '%s-traj.png' % craft['name']
 
     )
 
