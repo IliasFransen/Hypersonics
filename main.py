@@ -19,7 +19,7 @@ sc_params = [dhs/2, S, m, x_lst, y_lst]
 
 # ICs (temps values)
 h0 = 120000  # initial altitude [m]
-beta0 = 6.5 * np.pi/180 + np.pi  # reentry angle [rad]
+beta0 = 1 * np.pi/180 + np.pi  # reentry angle [rad]
 V = 11200  # initial velocity magnitude [m/s]
 V0 = Get_VInit(V, beta0)
 Vx0 = V0[0]  # initial x velocity [m/s]
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     
     GA = GeneticAlgorithmOptimization()
     
-    t = np.linspace(0, 2000, 1000)
+    t = np.linspace(0, 2000, 1001)
     q = np.zeros(len(t))
     Q = np.zeros(len(t))
     ng = np.zeros(len(t))

@@ -27,5 +27,4 @@ def plot_apollo_heatshield(x, y):
 # height = 0.5  # Replace with your actual value
 # #
 # x_points, y_points = generate_heatshield_points(radius_of_curvature, diameter, height)
-# print(len(y_points))
 # plot_apollo_heatshield(x_points,y_points)
