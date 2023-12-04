@@ -74,7 +74,7 @@ class GeneticAlgorithmOptimization:
         T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
         
         # constraints
-        ng = N / (m * g) # load deceleration [g's]
+        ng = (N**2+T**2) / (m * g) # load deceleration [g's]
 
         V = np.sqrt(Vx**2 + Vy**2) # velocity magnitude
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3) # Sutton-Graves stagnation point heat flux approximation [W/m^2]

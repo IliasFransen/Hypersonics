@@ -75,7 +75,7 @@ if __name__ == "__main__":
             break
         
     x = list(zip(*x))
-    
+    print(alpha)
     Vx = x[0][0:-1]
     Vx2 = tuple(x**2 for x in Vx)
     Vy = x[1][0:-1]

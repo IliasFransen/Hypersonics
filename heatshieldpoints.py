@@ -1,61 +1,33 @@
-# import numpy as np
-# import matplotlib.pyplot as plt
-#
-# def generate_heatshield_points(radius_of_curvature, height, diameter):
-#     # Calculate the semi-axes of the ellipse
-#     a = diameter / 2
-#     b = height
-#
-#     # Generate points along the ellipse
-#     theta = np.linspace(0, np.pi, 1000)
-#     x = a * np.cos(theta)
-#     y = b * np.sin(theta) - b + radius_of_curvature
-#
-#     return x, y
-#
-# # Example usage:
-# radius_of_curvature = 6.03504
-# height = 12
-# diameter = 5.03
-#
-# x, y = generate_heatshield_points(radius_of_curvature, height, diameter)
-#
-# # Plot the points
-# plt.figure(figsize=(6,6))
-# plt.plot(x, y)
-# plt.xlabel('X')
-# plt.ylabel('Y')
-# plt.title('Heatshield Profile')
-# plt.grid(True)
-# plt.show()
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-def generate_heatshield_points(radius, height, diameter):
-    # Calculate the x points for a circle
-    theta = np.linspace(0, 2*np.pi, 100)
-    x_circle = radius * np.cos(theta)
+def create_curved_plate(radius, width, height):
+    # Generate theta values for the curve
+    theta = np.linspace(0, 2*np.pi, 200)
 
-    # Calculate the y points for a circle
-    y_circle = radius * np.sin(theta)
+    # Parametric equations for a circle
+    x = radius * np.cos(theta)
+    y = radius * np.sin(theta)
 
-    # Scale the y points based on the height and diameter
-    y_scaled = y_circle * (height / diameter)
+    # Translate the circle to create the plate
+    y = y + radius-height
+    x = x[y <= 0]
+    y = y[y <= 0]
+    return x, y
 
-    # Plot the heatshield
-    plt.plot(x_circle, y_scaled, label='Heatshield')
-    plt.title('Space Crew Capsule Heatshield')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+def plot_curved_plate(x, y):
+    plt.plot(x, y, label='Curved Plate')
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
     plt.legend()
     plt.axis('equal')
     plt.grid(True)
     plt.show()
 
-# Example usage
-radius_of_curvature = 10  # Adjust as needed
-height_of_heatshield = 5  # Adjust as needed
-diameter_of_capsule = 8   # Adjust as needed
+# Example usage:
+radius = 4.69392
+width = 3.9116
+height = 0.635
 
-generate_heatshield_points(radius_of_curvature, height_of_heatshield, diameter_of_capsule)
+x_plate, y_plate = create_curved_plate(radius, width, height)
+plot_curved_plate(x_plate, y_plate)
