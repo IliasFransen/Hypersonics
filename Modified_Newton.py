@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import simpson
 from Atmosphereic_Conditions import Get_SoundSpeed, Get_Density
+import warnings
 
 #x and y lists must be points specified from left to right on sideview
 #nr of points must be odd
@@ -11,7 +12,7 @@ def Get_Theta(x_lst : list, y_lst : list, alpha : float):
 
     theta = np.array([])
 
-    for i in range(len(x_lst)):
+    for i in range(len(x_lst) - 1):
 
         slope = (y_lst[i+1]-y_lst[i]) / (x_lst[i+1]-x_lst[i])
 
@@ -21,6 +22,8 @@ def Get_Theta(x_lst : list, y_lst : list, alpha : float):
             theta_temp = np.arctan(abs(slope)) + alpha
    
         theta = np.append(theta,theta_temp)
+        
+    return theta
     
 
 #Get_MidPoints computes the x and y coodinate of the midpoints of each panel
@@ -29,7 +32,7 @@ def Get_MidPoints (x_lst : list, y_lst : list):
     x_mid = np.array([])
     y_mid = np.array([])
 
-    for i in range(len(x_lst)):
+    for i in range(len(x_lst)-1):
         x_mid = np.append(x_mid, (x_lst[i]+x_lst[i+1])/2)
         y_mid = np.append(y_mid, (y_lst[i]+y_lst[i+1])/2)
 
@@ -70,6 +73,7 @@ def Get_CpMax(Vx : float, Vy : float, h: float, gamma : float):
 #Get_Normal gives the normal force working on the SC
 
 def Get_Normal(Vx : float, Vy : float, h: float, gamma : float, x_lst : list, y_lst : list, alpha : float):
+    
     Cp_max = Get_CpMax(Vx, Vy, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
@@ -87,14 +91,10 @@ def Get_Tangential(Vx : float, Vy : float, h: float, gamma : float, x_lst : list
 
     Cp_local = CP_max*np.sin(theta)**2
 
-    integral_left = simpson(Cp_local[:len(Cp_local)+1], y[:len(Cp_local)+1])
+    integral_left = simpson(Cp_local[:len(Cp_local)//2+1], y[:len(Cp_local)//2+1])
 
-    integral_right = simpson(Cp_local[len(Cp_local):], y[len(Cp_local):])
+    integral_right = simpson(Cp_local[len(Cp_local)//2+1:], y[len(Cp_local)//2+1:])
 
     T = (integral_right-integral_left) * Get_Density(h) * (Vx**2+Vy**2) * 0.5
 
     return T
-
-
-
-
