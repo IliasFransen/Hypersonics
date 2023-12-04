@@ -7,13 +7,13 @@ from Modified_Newton import Get_Normal, Get_Tangential
 
 def StateUpdate( states: list, t : list,g : float, m : float, alpha : float, gamma : float, x_lst : list, y_lst : list):
     Vx, Vy, h = states
-
+    R = 6378*1000
     eta = Get_Angles(Vx, Vy, alpha)[1]
     N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
     T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
     dVxdt = N*np.cos(eta-np.pi)/m + T*np.cos(eta-np.pi*0.5)/m
-    dVydt = -g + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
+    dVydt = -g +Vx**2/R + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
     dhdt = Vy
 
     return [dVxdt, dVydt, dhdt]

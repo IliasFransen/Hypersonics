@@ -46,7 +46,6 @@ class GeneticAlgorithmOptimization:
         toolbox = self.toolbox
         evaluate = self.evaluate        
         check_feasibility = self.check_feasibility
-   
 
         toolbox.register("alpha", random.uniform, alpha_min, alpha_max)
         toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.alpha, n = 1)
@@ -54,9 +53,9 @@ class GeneticAlgorithmOptimization:
         toolbox.register("evaluate", evaluate)
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=alpha_min, up=alpha_max, eta=eta)
         toolbox.register("mutate", tools.mutPolynomialBounded, low=alpha_min, up=alpha_max, eta=eta, indpb=0.05)
-        toolbox.register("select", tools.selNSGA2)    
-        toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 100000000))
-        
+        toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 100000))
+        toolbox.register("select", tools.selNSGA2)
+
     def solve(self, alpha, Vx, Vy, h):
         
         g = self.atm_params[0]

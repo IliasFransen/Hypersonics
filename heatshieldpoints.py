@@ -1,33 +1,31 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-def create_curved_plate(radius, width, height):
-    # Generate theta values for the curve
-    theta = np.linspace(0, 2*np.pi, 200)
+def generate_heatshield_points(radius_of_curvature, diameter, height, num_points=100):
+    # Parametric equations for an ellipse
+    theta = np.linspace(0, 2*np.pi, num_points)
+    x = diameter/2 * np.cos(theta)
+    y = height/2 * np.sin(theta)
 
-    # Parametric equations for a circle
-    x = radius * np.cos(theta)
-    y = radius * np.sin(theta)
-
-    # Translate the circle to create the plate
-    y = y + radius-height
-    x = x[y <= 0]
-    y = y[y <= 0]
+    # Apply curvature to the points
+    x_curved = x + radius_of_curvature - diameter/2
+    x,y = x_curved[y <= 0], y[y <= 0]
     return x, y
 
-def plot_curved_plate(x, y):
-    plt.plot(x, y, label='Curved Plate')
-    plt.xlabel('X-axis')
-    plt.ylabel('Y-axis')
-    plt.legend()
-    plt.axis('equal')
+def plot_apollo_heatshield(x, y):
+    plt.scatter(x, y)
+    plt.title("Apollo Command Module Heatshield")
+    plt.xlabel("X-axis")
+    plt.ylabel("Y-axis")
+    plt.gca().set_aspect('equal', adjustable='box')
     plt.grid(True)
     plt.show()
 
-# Example usage:
-radius = 4.69392
-width = 3.9116
-height = 0.635
-
-x_plate, y_plate = create_curved_plate(radius, width, height)
-plot_curved_plate(x_plate, y_plate)
+# # Example usage
+# radius_of_curvature = 6  # Replace with your actual value
+# diameter = 4  # Replace with your actual value
+# height = 0.5  # Replace with your actual value
+# #
+# x_points, y_points = generate_heatshield_points(radius_of_curvature, diameter, height)
+# print(len(y_points))
+# plot_apollo_heatshield(x_points,y_points)
