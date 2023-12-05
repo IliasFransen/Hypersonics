@@ -10,8 +10,8 @@ class GeneticAlgorithmOptimization:
            
     # GA setup
 
-    ngen = 5 # number of generations
-    nind = 10 # number of individuals
+    ngen = 3 # number of generations
+    nind = 3 # number of individuals
     eta = 5.0 # SBX crossover operator
     mutpb = 0.01 # probability of mutation
     cxpb = 0.6 # probability of crossover
@@ -72,7 +72,7 @@ class GeneticAlgorithmOptimization:
         T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
         
         # constraints
-        ng = (N**2+T**2) / (m * g) # load deceleration [g's]
+        ng = (N**2+T**2)**0.5 / (m * g) # load deceleration [g's]
 
         V = np.sqrt(Vx**2 + Vy**2) # velocity magnitude
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3) # Sutton-Graves stagnation point heat flux approximation [W/m^2]

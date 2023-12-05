@@ -10,8 +10,8 @@ from scipy.integrate import odeint
 class GeneticAlgorithmOptimization:
     # GA setup
 
-    ngen = 5  # number of generations
-    nind = 10  # number of individuals
+    ngen = 3  # number of generations
+    nind = 3  # number of individuals
     eta = 5.0  # SBX crossover operator
     mutpb = 0.01  # probability of mutation
     cxpb = 0.6  # probability of crossover
@@ -75,7 +75,7 @@ class GeneticAlgorithmOptimization:
         D = Get_Drag(N, T, alpha)
 
         # constraints
-        ng = (L ** 2 + D ** 2) / (m * g)  # load deceleration [g's]
+        ng = (L ** 2 + D ** 2)**0.5 / (m * g)  # load deceleration [g's]
 
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3)  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
 

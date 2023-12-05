@@ -101,41 +101,49 @@ if __name__ == "__main__":
     plt.plot(t, h)
     plt.xlabel('t [s]')
     plt.ylabel('Altitude [m]')
+    plt.tight_layout()
 
     plt.figure(2)
     plt.plot(t, V)
     plt.xlabel('t [s]')
     plt.ylabel('Velocity [m/s]')
+    plt.tight_layout()
 
     plt.figure(3)
     plt.plot(t, Vx)
     plt.xlabel('t [s]')
     plt.ylabel('Velocity x [m/s]')
+    plt.tight_layout()
 
     plt.figure(4)
     plt.plot(t, Vy)
     plt.xlabel('t [s]')
     plt.ylabel('Velocity y [m/s]')
+    plt.tight_layout()
 
     plt.figure(5)
     plt.plot(t, np.gradient(V, t))
     plt.xlabel('t [s]')
     plt.ylabel('Grad(Velocity)=a [m/s^2]')
+    plt.tight_layout()
 
     plt.figure(6)
     plt.plot(V, h)
     plt.xlabel('V [m/s]')
     plt.ylabel('Altitude [m]')
+    plt.tight_layout()
 
     plt.figure(7)
     plt.plot(N, h)
     plt.xlabel('N [N]')
     plt.ylabel('Altitude [m]')
+    plt.tight_layout()
 
     plt.figure(8)
     plt.plot(T, h)
     plt.xlabel('T [N]')
     plt.ylabel('Altitude [m]')
+    plt.tight_layout()
     #
     # plt.figure(5)
     # plt.plot(q, h)
@@ -151,5 +159,6 @@ if __name__ == "__main__":
     # plt.plot(ng, h)
     # plt.xlabel('Deceleration Load [g]')
     # plt.ylabel('Altitude [m]')
+
 
     plt.show()

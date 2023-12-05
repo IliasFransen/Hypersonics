@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     GA = GeneticAlgorithmOptimization()
     
-    t = np.linspace(0, 1000, 51)
+    t = np.linspace(0, 500, 101)
     q = np.zeros(len(t))
     Q = np.zeros(len(t))
     L = np.zeros(len(t))
@@ -85,6 +85,8 @@ if __name__ == "__main__":
     fpa = x[1]
     h = x[2]
 
+    Vx = np.multiply(V, np.cos(fpa))
+    Vy = np.multiply(V, np.sin(fpa))
     # if len(h) == len(t)+1:
     #     V = V[0:-1]
     #     fpa = fpa[0:-1]
@@ -94,28 +96,44 @@ if __name__ == "__main__":
     plt.plot(t, h)
     plt.xlabel('t [s]')
     plt.ylabel('Altitude [m]')
+    plt.tight_layout()
 
     plt.figure(2)
     plt.plot(t, V)
     plt.xlabel('t [s]')
     plt.ylabel('Velocity [m/s]')
+    plt.tight_layout()
+
+    plt.figure(3)
+    plt.plot(t, Vy)
+    plt.xlabel('t [s]')
+    plt.ylabel('Velocity y [m/s]')
+    plt.tight_layout()
+
+    plt.figure(4)
+    plt.plot(t, Vx)
+    plt.xlabel('t [s]')
+    plt.ylabel('Velocity x [m/s]')
+    plt.tight_layout()
 
     plt.figure(5)
     plt.plot(t, np.gradient(V, t))
     plt.xlabel('t [s]')
     plt.ylabel('Grad(Velocity)=a [m/s^2]')
+    plt.tight_layout()
 
     plt.figure(6)
     plt.plot(V, h)
     plt.xlabel('V [m/s]')
     plt.ylabel('Altitude [m]')
-    #
+    plt.tight_layout()
+
     # plt.figure(5)
     # plt.plot(q, h)
     # plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
     # plt.ylabel('Altitude [m]')
     #
-    # plt.figure(6)g
+    # plt.figure(6)
     # plt.plot(Q, h)
     # plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
     # plt.ylabel('Altitude [m]')

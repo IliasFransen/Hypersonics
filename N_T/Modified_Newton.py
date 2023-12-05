@@ -79,7 +79,7 @@ def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst:
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2) * 0.5
+    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)
 
     return N
 
@@ -96,6 +96,6 @@ def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
 
-    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2) * 0.5
+    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
 
     return T
