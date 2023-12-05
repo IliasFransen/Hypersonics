@@ -11,11 +11,11 @@ class GeneticAlgorithmOptimization:
     # GA setup
 
     ngen = 3  # number of generations
-    nind = 3  # number of individuals
+    nind = 10  # number of individuals
     eta = 5.0  # SBX crossover operator
     mutpb = 0.01  # probability of mutation
     cxpb = 0.6  # probability of crossover
-    nhof = 2  # hall of fame size
+    nhof = 1  # hall of fame size
 
     # control variable bounds
 
@@ -25,8 +25,8 @@ class GeneticAlgorithmOptimization:
 
     # constraints
 
-    q_max = 4.83 * 10 ** 6  # max. stag. heat [W/m^2]
-    ng_max = 8.0  # max. g-load [g]
+    q_max = 2.5 * 10 ** 6  # max. stag. heat [W/m^2]
+    ng_max = 6.0  # max. g-load [g]
 
     # Sutton-Graves stagnation point heat transfer coefficient for earth
     k = 1.7415 * 10 ** (-4)

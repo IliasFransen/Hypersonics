@@ -62,8 +62,8 @@ def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
 
 # Get_CpMax gives the cpmax from modified newtonian theory
 
-def Get_CpMax(V: float, h: float, gamma: float):
-    V_inf = V
+def Get_CpMax(Vx: float, Vy: float, h: float, gamma: float):
+    V_inf = (Vx ** 2 + Vy ** 2) ** 0.5
     a = Get_SoundSpeed(h)
     M_inf = V_inf / a
 
@@ -78,21 +78,20 @@ def Get_CpMax(V: float, h: float, gamma: float):
 
 # Get_Normal gives the normal force working on the SC
 
-def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
-
-    Cp_max = Get_CpMax(V, h, gamma)
+def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+    Cp_max = Get_CpMax(Vx, Vy, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * V**2
+    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)
 
     return N
 
 
-def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
-    CP_max = Get_CpMax(V, h, gamma)
+    CP_max = Get_CpMax(Vx, Vy, h, gamma)
     theta = Get_Theta(x_lst, y_lst, alpha)
 
     y = Get_MidPoints(x_lst, y_lst)[1]
@@ -103,16 +102,6 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
 
-    T = (integral_right - integral_left) * Get_Density(h) * V**2
-
+    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
     return T
 
-
-def Get_Lift(N: float, T: float, V : float, h : float, alpha: float):
-    L = -N*np.sin(alpha) + T*np.cos(alpha)
-    return L
-
-
-def Get_Drag(N: float, T: float, V : float, h : float, alpha: float):
-    D = N * np.cos(alpha) + T * np.sin(alpha)
-    return D

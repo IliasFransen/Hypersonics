@@ -2,7 +2,7 @@ import numpy as np
 import random
 from deap import base, creator, tools, algorithms
 from Atmosphereic_Conditions import Get_Density
-from Modified_Newton import Get_Lift, Get_Drag, Get_Tangential, Get_Normal
+from Modified_Newton import Get_Normal, Get_Tangential
 from State_System import StateUpdate
 from scipy.integrate import odeint
 
@@ -56,7 +56,7 @@ class GeneticAlgorithmOptimization:
         toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 100000))
         toolbox.register("select", tools.selNSGA2)
 
-    def solve(self, alpha, V, h):
+    def solve(self, alpha, Vx, Vy, h):
 
         g = self.atm_params[0]
         gamma = self.atm_params[1]
@@ -68,20 +68,18 @@ class GeneticAlgorithmOptimization:
         x_lst = self.sc_params[2]
         y_lst = self.sc_params[3]
 
-        N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-        T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
-
-        L = Get_Lift(N, T, V, h, alpha)
-        D = Get_Drag(N, T, V, h, alpha)
+        N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
+        T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
         # constraints
-        ng = np.sqrt(L** 2 + D** 2) / (m * g)  # load deceleration [g's]
+        ng = (N ** 2 + T ** 2)**0.5 / (m * g)  # load deceleration [g's]
 
+        V = np.sqrt(Vx ** 2 + Vy ** 2)  # velocity magnitude
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3)  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
 
-        return [alpha, L, D, q, ng]
+        return [alpha, N, T, q, ng]
 
-    def getSolution(self, x, atm_params, sc_params, tspan):
+    def getSolution(self, x, alpha, atm_params, sc_params, tspan):
 
         self.x = x[-1]
         self.sc_params = sc_params
@@ -103,12 +101,11 @@ class GeneticAlgorithmOptimization:
         args = (g, m, alpha, gamma, x_lst, y_lst)
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
-        V = sol[-1, 0]
-
+        Vx = sol[-1, 0]
+        Vy = sol[-1, 1]
         h = sol[-1, 2]
 
-        opt = self.solve(alpha, V, h)
-
+        opt = self.solve(alpha, Vx, Vy, h)
         return opt, sol
 
     # Evolutionary algorithm
@@ -147,10 +144,10 @@ class GeneticAlgorithmOptimization:
 
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
-        V = sol[-1, 0]
+        Vx = sol[-1, 0]
+        Vy = sol[-1, 1]
         h = sol[-1, 2]
-
-        opt = self.solve(alpha, V, h)
+        opt = self.solve(alpha, Vx, Vy, h)
 
         q = opt[3]
         ng = opt[4]
@@ -185,13 +182,15 @@ class GeneticAlgorithmOptimization:
 
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
-        V = sol[-1, 0]
+        Vx = sol[-1, 0]
+        Vy = sol[-1, 1]
         h = sol[-1, 2]
 
         weights = [0.4, 0.6]
 
-        opt = self.solve(alpha, V, h)
+        opt = self.solve(alpha, Vx, Vy, h)
 
+        alpha = opt[0]
         q = opt[3]
         ng = opt[4]
 

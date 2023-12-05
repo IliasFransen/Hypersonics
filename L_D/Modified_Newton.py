@@ -16,10 +16,16 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
 
-        if i > len(x_lst) / 2:
-            theta_temp = np.arctan(abs(slope)) - alpha
+        if alpha > 0:
+            if i > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) - alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) + alpha
         else:
-            theta_temp = np.arctan(abs(slope)) + alpha
+            if i > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) + alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) - alpha
 
         theta = np.append(theta, theta_temp)
 
@@ -79,7 +85,7 @@ def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * V**2 * np.pi
+    N = Cn * Get_Density(h) * V**2
 
     return N
 
@@ -97,7 +103,7 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
 
-    T = (integral_right - integral_left) * Get_Density(h) * V**2 * np.pi
+    T = (integral_right - integral_left) * Get_Density(h) * V**2
 
     return T
 

@@ -1,34 +1,30 @@
 import numpy as np
-from Modified_Newton import Get_Drag, Get_Lift, Get_Tangential, Get_Normal
-from Atmosphereic_Conditions import Get_Density
+from FBD_Stuff import Get_Angles
+from Modified_Newton import Get_Normal, Get_Tangential
 
 
 # StateUpdate is gives the system of differential equations that needs to be S
 
 def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list):
-    V, fpa, h = states
-    
+    Vx, Vy, h = states
+
     r = 6378 * 1000 + h
+    eta = Get_Angles(Vx, Vy, alpha)[1]
+    N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
+    T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
-    N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    dVxdt = N * np.cos(eta - np.pi) / m + T * np.cos(eta - np.pi * 0.5) / m
+    dVydt = -g - Vx ** 2 / r + N * np.sin(eta - np.pi) / m + T * np.sin(eta - np.pi * 0.5) / m
+    dhdt = Vy
 
-    L = Get_Lift(N, T, V, h, alpha)
-    D = Get_Drag(N, T, V, h, alpha)
-      
-    dVdt = -D / m - g * np.sin(fpa)
-    dfpadt = L / (V * m) - (g / V - V / r) * np.cos(fpa)
-    dhdt = V*np.sin(fpa)
-
-    return [dVdt, dfpadt, dhdt]
+    return [dVxdt, dVydt, dhdt]
 
 
-# Get_VInit gives intial velocities, fpa must be measured from POSITIVE X AXIS
-
-def Get_VInit(V0: float, fpa0: float):
+# Get_VInit gives intial velocities eta must be measured from POSITIVE X AXIS
+def Get_VInit(V0: float, beta0: float):
     V0 = abs(V0)
 
-    Vx0 = V0 * np.cos(fpa0)
-    Vy0 = V0 * np.sin(fpa0)
+    Vx0 = V0 * np.cos(beta0)
+    Vy0 = V0 * np.sin(beta0)
 
     return Vx0, Vy0
