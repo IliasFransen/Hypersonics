@@ -16,7 +16,7 @@ def Get_Theta(x_lst : list, y_lst : list, alpha : float):
 
         slope = (y_lst[i+1]-y_lst[i]) / (x_lst[i+1]-x_lst[i])
 
-        if i> len(x_lst)/2:
+        if i > len(x_lst)/2:
             theta_temp = np.arctan(abs(slope)) - alpha
         else:    
             theta_temp = np.arctan(abs(slope)) + alpha

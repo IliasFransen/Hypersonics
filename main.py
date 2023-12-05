@@ -9,17 +9,17 @@ from heatshieldpoints import generate_heatshield_points
 dhs = 3.9116  # heatshield diameter (m)
 R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
-S = 12.0  # reference area [m^2]
+
 m = 5357 / np.pi  # mass [kg]
 # x_lst = np.arange(-2, 2.1, 0.1) # x coords
 # y_lst = [(x/5)**2 for x in x_lst] # y coords
 x_lst, y_lst = generate_heatshield_points(R0hs, dhs, hhs)
 
-sc_params = [dhs/2, S, m, x_lst, y_lst]
+sc_params = [R0hs, m, x_lst, y_lst]
 
 # ICs (temps values)
 h0 = 120000  # initial altitude [m]
-beta0 = 1 * np.pi/180 + np.pi  # reentry angle [rad]
+beta0 = 6.5 * np.pi/180 + np.pi  # reentry angle [rad]
 V = 11200  # initial velocity magnitude [m/s]
 V0 = Get_VInit(V, beta0)
 Vx0 = V0[0]  # initial x velocity [m/s]
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     
     GA = GeneticAlgorithmOptimization()
     
-    t = np.linspace(0, 2000, 1001)
+    t = np.linspace(0, 2000, 101)
     q = np.zeros(len(t))
     Q = np.zeros(len(t))
     ng = np.zeros(len(t))

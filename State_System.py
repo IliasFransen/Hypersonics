@@ -13,7 +13,7 @@ def StateUpdate( states: list, t : list,g : float, m : float, alpha : float, gam
     T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
     dVxdt = N*np.cos(eta-np.pi)/m + T*np.cos(eta-np.pi*0.5)/m
-    dVydt = -g +Vx**2/R + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
+    dVydt = -g - Vx**2/(R+h) + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
     dhdt = Vy
 
     return [dVxdt, dVydt, dhdt]

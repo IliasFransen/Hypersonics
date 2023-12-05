@@ -64,10 +64,9 @@ class GeneticAlgorithmOptimization:
         rho = Get_Density(h)
 
         R0 = self.sc_params[0]
-        S = self.sc_params[1]
-        m = self.sc_params[2]
-        x_lst = self.sc_params[3]
-        y_lst = self.sc_params[4]
+        m = self.sc_params[1]
+        x_lst = self.sc_params[2]
+        y_lst = self.sc_params[3]
                 
         N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
@@ -82,11 +81,11 @@ class GeneticAlgorithmOptimization:
 
     def getSolution(self, x, alpha, atm_params, sc_params, tspan):
 
-        [Vx, Vy, h] = x[-1]
-        
-        [R0, S, m, x_lst, y_lst] = sc_params
-        
-        [g, gamma] = atm_params
+        # [Vx, Vy, h] = x[-1]
+        #
+        # [R0, m, x_lst, y_lst] = sc_params
+        #
+        # [g, gamma] = atm_params
         
         self.x = x[-1]
         self.sc_params = sc_params
@@ -99,12 +98,10 @@ class GeneticAlgorithmOptimization:
         
         g = self.atm_params[0]
         gamma = self.atm_params[1]
-        
-        R0 = self.sc_params[0]
-        S = self.sc_params[1]
-        m = self.sc_params[2]
-        x_lst = self.sc_params[3]
-        y_lst = self.sc_params[4]
+
+        m = self.sc_params[1]
+        x_lst = self.sc_params[2]
+        y_lst = self.sc_params[3]
         
         x0 = self.x
 
@@ -143,12 +140,10 @@ class GeneticAlgorithmOptimization:
         
         g = self.atm_params[0]
         gamma = self.atm_params[1]
-        
-        R0 = self.sc_params[0]
-        S = self.sc_params[1]
-        m = self.sc_params[2]
-        x_lst = self.sc_params[3]
-        y_lst = self.sc_params[4]
+
+        m = self.sc_params[1]
+        x_lst = self.sc_params[2]
+        y_lst = self.sc_params[3]
         
         tspan = self.tspan
 
@@ -186,9 +181,9 @@ class GeneticAlgorithmOptimization:
         g = self.atm_params[0]
         gamma = self.atm_params[1]
 
-        m = self.sc_params[2]
-        x_lst = self.sc_params[3]
-        y_lst = self.sc_params[4]
+        m = self.sc_params[1]
+        x_lst = self.sc_params[2]
+        y_lst = self.sc_params[3]
         
         x0 = self.x
         tspan = self.tspan 
