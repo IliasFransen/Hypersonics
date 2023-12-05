@@ -12,14 +12,14 @@ def generate_heatshield_points(radius_of_curvature, diameter, height, num_points
     x,y = x_curved[y <= 0], y[y <= 0]
     return x, y
 
-def plot_apollo_heatshield(x, y):
-    plt.scatter(x, y)
-    plt.title("Apollo Command Module Heatshield")
-    plt.xlabel("X-axis")
-    plt.ylabel("Y-axis")
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.grid(True)
-    plt.show()
+# def plot_apollo_heatshield(x, y):
+#     plt.scatter(x, y)
+#     plt.title("Apollo Command Module Heatshield")
+#     plt.xlabel("X-axis")
+#     plt.ylabel("Y-axis")
+#     plt.gca().set_aspect('equal', adjustable='box')
+#     plt.grid(True)
+#     plt.show()
 
 # # Example usage
 # radius_of_curvature = 6  # Replace with your actual value

@@ -17,11 +17,3 @@ def Get_Density(h: float):
     properies = isa.ATMOSPHERE_1976(h, dT=0.0)
     rho = properies.rho
     return float(rho)
-
-# h = np.arange(0,120000,1000)
-# density=[]
-# for h_i in h:
-#     density.append(Get_Density(h_i))
-#
-# plt.plot(density,h)
-# plt.show()
