@@ -1,5 +1,6 @@
 import numpy as np
 import fluids.atmosphere as isa
+import matplotlib.pyplot as plt
 
 #Get_SoundSpeed takes the altitude in meters as a float and returns the speed of sound at said altitude in meters per second
 
@@ -17,3 +18,6 @@ def Get_Density(h: float):
     rho = properies.rho
     return float(rho)
 
+h = np.arange(0,120000,1000)
+plt.plot(Get_Density(h),h)
+plt.show()
