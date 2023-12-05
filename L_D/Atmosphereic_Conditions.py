@@ -18,6 +18,10 @@ def Get_Density(h: float):
     rho = properies.rho
     return float(rho)
 
-h = np.arange(0,120000,1000)
-plt.plot(Get_Density(h),h)
-plt.show()
+# h = np.arange(0,120000,1000)
+# density=[]
+# for h_i in h:
+#     density.append(Get_Density(h_i))
+#
+# plt.plot(density,h)
+# plt.show()

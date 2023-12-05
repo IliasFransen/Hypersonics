@@ -1,33 +1,34 @@
 import numpy as np
-from scipy.integrate import odeint
 from FBD_Stuff import Get_Angles
 from Modified_Newton import Get_Normal, Get_Tangential
 
-#StateUpdate is gives the system of differential equations that needs to be S
 
-def StateUpdate( states: list, t : list,g : float, m : float, alpha : float, gamma : float, x_lst : list, y_lst : list):
+# StateUpdate is gives the system of differential equations that needs to be S
+
+def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list):
     Vx, Vy, h = states
-    R = 6378*1000
+    R = 6378 * 1000
     eta = Get_Angles(Vx, Vy, alpha)[1]
     N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
     T = Get_Tangential(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
-    dVxdt = N*np.cos(eta-np.pi)/m + T*np.cos(eta-np.pi*0.5)/m
-    dVydt = -g - Vx**2/(R+h) + N*np.sin(eta-np.pi)/m + T*np.sin(eta-np.pi*0.5)/m
+    dVxdt = N * np.cos(eta - np.pi) / m + T * np.cos(eta - np.pi * 0.5) / m
+    dVydt = -g - Vx ** 2 / (R + h) + N * np.sin(eta - np.pi) / m + T * np.sin(eta - np.pi * 0.5) / m
     dhdt = Vy
 
     return [dVxdt, dVydt, dhdt]
 
 
-#Get_VInit gives intial velocities eta must be measured from POSITIVE X AXIS
+# Get_VInit gives intial velocities eta must be measured from POSITIVE X AXIS
 
-def Get_VInit (V0 : float, beta0 : float):
+def Get_VInit(V0: float, beta0: float):
     V0 = abs(V0)
 
     Vx0 = V0 * np.cos(beta0)
     Vy0 = V0 * np.sin(beta0)
 
     return Vx0, Vy0
+
 
 """
 def Solver(V0 : float, beta0 : float, h0 : float, t: list, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
