@@ -16,10 +16,16 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
 
-        if i+1 > len(x_lst) / 2:
-            theta_temp = np.arctan(abs(slope)) + alpha
+        if alpha > 0:
+            if i > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) - alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) + alpha
         else:
-            theta_temp = np.arctan(abs(slope)) - alpha
+            if i > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) + alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) - alpha
 
         theta = np.append(theta, theta_temp)
 
@@ -74,12 +80,11 @@ def Get_CpMax(Vx: float, Vy: float, h: float, gamma: float):
 
 def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
     Cp_max = Get_CpMax(Vx, Vy, h, gamma)
-
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)/2
+    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)
 
     return N
 
@@ -87,17 +92,16 @@ def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst:
 def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
     CP_max = Get_CpMax(Vx, Vy, h, gamma)
-
     theta = Get_Theta(x_lst, y_lst, alpha)
 
     y = Get_MidPoints(x_lst, y_lst)[1]
 
     Cp_local = CP_max * np.sin(theta) ** 2
 
-    integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
+    integral_left = simpson(Cp_local[:len(Cp_local) // 2 + 1], y[:len(Cp_local) // 2 + 1])
 
-    integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
+    integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
 
-    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)/2
+    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
     return T
 
