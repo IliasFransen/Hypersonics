@@ -15,11 +15,17 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
     for i in range(len(x_lst) - 1):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
-
-        if i+1 > len(x_lst) / 2:
-            theta_temp = np.arctan(abs(slope)) + alpha
+        
+        if alpha > 0:
+            if i+1 > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) - alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) + alpha
         else:
-            theta_temp = np.arctan(abs(slope)) - alpha
+            if i+1 > len(x_lst) / 2:
+                theta_temp = np.arctan(abs(slope)) + alpha
+            else:
+                theta_temp = np.arctan(abs(slope)) - alpha
 
         theta = np.append(theta, theta_temp)
 
@@ -87,22 +93,18 @@ def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst:
 def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
     CP_max = Get_CpMax(Vx, Vy, h, gamma)
-
     theta = Get_Theta(x_lst, y_lst, alpha)
 
     y = Get_MidPoints(x_lst, y_lst)[1]
 
     Cp_local = CP_max * np.sin(theta) ** 2
 
-    integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
+    integral_left = simpson(Cp_local[:len(Cp_local) // 2 + 1], y[:len(Cp_local) // 2 + 1])
 
-    integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
+    integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
 
-    print(integral_left,'intleft')
-    print(integral_right,'intreight')
-
-    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)/2
+    T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
     return T
 
-T = Get_Tangential(1700, 100, 1, 1.4, np.array([-1,-0.5,0,0.5,1]), np.array([1,0.5,0,0.5,1]), np.radians(3))
-print(T)
+N = Get_Normal(1700, 100, 1, 1.4, np.array([-1,-0.5,0,0.5,1]), np.array([1,0.5,0,0.5,1]), np.radians(3))
+print(N)
