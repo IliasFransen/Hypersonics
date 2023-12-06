@@ -15,14 +15,14 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
     for i in range(len(x_lst) - 1):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
-
+        
         if alpha > 0:
-            if i > len(x_lst) / 2:
+            if i+1 > len(x_lst) / 2:
                 theta_temp = np.arctan(abs(slope)) - alpha
             else:
                 theta_temp = np.arctan(abs(slope)) + alpha
         else:
-            if i > len(x_lst) / 2:
+            if i+1 > len(x_lst) / 2:
                 theta_temp = np.arctan(abs(slope)) + alpha
             else:
                 theta_temp = np.arctan(abs(slope)) - alpha
@@ -80,11 +80,12 @@ def Get_CpMax(Vx: float, Vy: float, h: float, gamma: float):
 
 def Get_Normal(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
     Cp_max = Get_CpMax(Vx, Vy, h, gamma)
+
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)
+    N = Cn * Get_Density(h) * (Vx ** 2 + Vy ** 2)/2
 
     return N
 
@@ -105,3 +106,5 @@ def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_
     T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
     return T
 
+N = Get_Normal(1700, 100, 1, 1.4, np.array([-1,-0.5,0,0.5,1]), np.array([1,0.5,0,0.5,1]), np.radians(3))
+print(N)
