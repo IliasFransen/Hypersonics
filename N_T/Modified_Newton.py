@@ -98,6 +98,11 @@ def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
+    print(integral_left,'intleft')
+    print(integral_right,'intreight')
+
     T = (integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)/2
     return T
 
+T = Get_Tangential(1700, 100, 1, 1.4, np.array([-1,-0.5,0,0.5,1]), np.array([1,0.5,0,0.5,1]), np.radians(3))
+print(T)
