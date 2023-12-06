@@ -1,3 +1,4 @@
+from math import isnan
 import numpy as np
 import random
 from deap import base, creator, tools, algorithms
@@ -11,11 +12,11 @@ class GeneticAlgorithmOptimization:
     # GA setup
 
     ngen = 3  # number of generations
-    nind = 10  # number of individuals
+    nind = 12  # number of individuals
     eta = 5.0  # SBX crossover operator
-    mutpb = 0.01  # probability of mutation
+    mutpb = 0.5  # probability of mutation
     cxpb = 0.6  # probability of crossover
-    nhof = 1  # hall of fame size
+    nhof = 2  # hall of fame size
 
     # control variable bounds
 
@@ -52,11 +53,11 @@ class GeneticAlgorithmOptimization:
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         toolbox.register("evaluate", evaluate)
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=alpha_min, up=alpha_max, eta=eta)
-        toolbox.register("mutate", tools.mutPolynomialBounded, low=alpha_min, up=alpha_max, eta=eta, indpb=0.05)
-        toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 100000))
+        toolbox.register("mutate", tools.mutPolynomialBounded, low=alpha_min, up=alpha_max, eta=eta, indpb=0.2)
+        toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 1E10))
         toolbox.register("select", tools.selNSGA2)
 
-    def solve(self, alpha, V, h):
+    def solve(self, alpha, V, h, fpa):
 
         g = self.atm_params[0]
         gamma = self.atm_params[1]
@@ -71,11 +72,11 @@ class GeneticAlgorithmOptimization:
         N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
 
-        L = Get_Lift(N, T, alpha)
-        D = Get_Drag(N, T, alpha)
+        L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
+        D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
 
         # constraints
-        ng = (L ** 2 + D ** 2)**0.5 / (m * g)  # load deceleration [g's]
+        ng = np.sqrt(L** 2 + D** 2) / (m * g)  # load deceleration [g's]
 
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3)  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
 
@@ -104,28 +105,70 @@ class GeneticAlgorithmOptimization:
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
         V = sol[-1, 0]
-
+        fpa = sol[-1, 1]
         h = sol[-1, 2]
 
-        opt = self.solve(alpha, V, h)
+        opt = self.solve(alpha, V, h, fpa)
 
         return opt, sol
 
     # Evolutionary algorithm
 
     def optimize(self):
-
+        
         toolbox = self.toolbox
         pop = toolbox.population(n=self.nind)
         NGEN = self.ngen
         CXPB = self.cxpb
         MUTPB = self.mutpb
+        
+        """
         hof = tools.HallOfFame(self.nhof)
-
+        
         algorithms.eaSimple(pop, toolbox, cxpb=CXPB, mutpb=MUTPB, ngen=NGEN, halloffame=hof, verbose=False)
-
+        
         return hof
+        """
+        
+        pareto = tools.ParetoFront()       
+        pareto.clear()
 
+        invalid_ind = [ind for ind in pop if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+            
+        pop = toolbox.select(pop, len(pop))
+        
+        for gen in range(1, NGEN):
+
+            offspring = tools.selTournamentDCD(pop, len(pop))
+            offspring = [toolbox.clone(ind) for ind in offspring]
+            
+            for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+                
+                if random.random() <= CXPB:
+                    toolbox.mate(ind1, ind2)
+                    del ind1.fitness.values, ind2.fitness.values
+            
+                for mutant in offspring:
+                    if random.random() < MUTPB:
+                        toolbox.mutate(mutant)
+                        del mutant.fitness.values
+                    
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+            for ind, fit in zip(invalid_ind, fitnesses):
+                ind.fitness.values = fit
+            
+            pop = toolbox.select(pop + offspring, self.nind)
+            
+        pareto.update(pop)
+        
+        return pareto
+        
+        
     # Check feasibility of solution
 
     def check_feasibility(self, params):
@@ -148,13 +191,16 @@ class GeneticAlgorithmOptimization:
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
         V = sol[-1, 0]
+        fpa = sol[-1, 1]
         h = sol[-1, 2]
 
-        opt = self.solve(alpha, V, h)
+        opt = self.solve(alpha, V, h, fpa)
 
         q = opt[3]
         ng = opt[4]
 
+        if isnan(q):
+            return False
         if ng > self.ng_max:
             print('ng failed: ng = %.5f' % ng)
             return False
@@ -186,11 +232,12 @@ class GeneticAlgorithmOptimization:
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
         V = sol[-1, 0]
+        fpa = sol[-1, 1]
         h = sol[-1, 2]
 
         weights = [0.4, 0.6]
 
-        opt = self.solve(alpha, V, h)
+        opt = self.solve(alpha, V, h, fpa)
 
         q = opt[3]
         ng = opt[4]
@@ -198,5 +245,5 @@ class GeneticAlgorithmOptimization:
         objectives = [q, ng]
 
         objfcn = sum(x * y for x, y in zip(weights, objectives)) / sum(weights)  # weighted sum average objective function
-
+        
         return objfcn,
