@@ -114,7 +114,7 @@ def Get_CLCD(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_lst: l
     N = Get_Normal(Vx, Vy, h, gamma, x_lst, y_lst, alpha)
 
     L = N*np.cos(alpha) - T*np.sin(alpha)
-    D = T*np.cos(alpha) - N * np.sin(alpha)
+    D = T*np.cos(alpha) + N * np.sin(alpha)
 
     S = Get_length(x_lst,y_lst)
 
