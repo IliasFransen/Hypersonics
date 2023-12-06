@@ -138,7 +138,7 @@ if __name__ == "__main__":
     plt.tight_layout()
 
     plt.figure(6)
-    plt.plot(h, M)
+    plt.plot(t, M)
     plt.xlabel('t [s]')
     plt.ylabel('Mach number [-]')
     plt.tight_layout()
