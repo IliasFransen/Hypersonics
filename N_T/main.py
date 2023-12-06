@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GeneticAlgorithm import GeneticAlgorithmOptimization
+from Atmosphereic_Conditions import Get_SoundSpeed
 from State_System import Get_VInit
 from scipy.integrate import simpson
 from heatshieldpoints import generate_heatshield_points
@@ -20,9 +21,9 @@ sc_params = [R0hs, m, x_lst, y_lst]
 
 # ICs (temps values)
 h0 = 120000  # initial altitude [m]
-beta0 = 6.5 * np.pi/180 + np.pi  # reentry angle [rad]
-V = 11200  # initial velocity magnitude [m/s]
-V0 = Get_VInit(V, beta0)
+fpa0 = 6.5 * np.pi/180 + np.pi  # reentry angle [rad]
+V0 = 11200  # initial velocity magnitude [m/s]
+V0 = Get_VInit(V0, fpa0)
 Vx0 = V0[0]  # initial x velocity [m/s]
 Vy0 = V0[1]  # initial y velocity [m/s]
 
@@ -39,15 +40,16 @@ atm_params = [g, gamma]
 if __name__ == "__main__":
     
     GA = GeneticAlgorithmOptimization()
-    
-    t = np.linspace(0, 260, 51)
+
+    t = np.linspace(0, 500, 101)
     q = np.zeros(len(t))
     Q = np.zeros(len(t))
     N = np.zeros(len(t))
     T = np.zeros(len(t))
     ng = np.zeros(len(t))
     AOA = np.zeros(len(t))
-    
+    M = np.zeros(len(t))
+
     x = [ICs]
 
     for i in range(0, len(t) - 1):
@@ -58,12 +60,15 @@ if __name__ == "__main__":
         tspan = [t1, t2]
 
         opt, sol = GA.getSolution(x, alpha, atm_params, sc_params, tspan)  # run genetic algorithm to get optimum
+        a = Get_SoundSpeed(sol[-1,2])
+
         AOA[i] = opt[0]
         alpha = opt[0]
         N[i] = opt[1]
         T[i] = opt[2]
         q[i] = opt[3]
         ng[i] = opt[4]
+        M[i] = np.linalg.norm(sol[-1, :2])/a
         
         Q[i] = simpson(q[0:i + 1], t[0:i + 1])
 
