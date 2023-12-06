@@ -92,9 +92,9 @@ def Get_Tangential(Vx: float, Vy: float, h: float, gamma: float, x_lst: list, y_
 
     Cp_local = CP_max * np.sin(theta) ** 2
 
-    integral_left = simpson(Cp_local[:len(Cp_local) // 2 + 1], y[:len(Cp_local) // 2 + 1])
+    integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
 
-    integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
+    integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
     T = 1/2*(integral_right - integral_left) * Get_Density(h) * (Vx ** 2 + Vy ** 2)
     return T
