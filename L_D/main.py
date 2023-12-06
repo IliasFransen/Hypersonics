@@ -7,9 +7,9 @@ from heatshieldpoints import generate_heatshield_points
 
 # Spacecraft parameters (temp values)
 dhs = 3.9116  # heatshield diameter (m)
-R0hs = 4.69392  # heatshield radius of curvature
+# R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
-R0hs = (dhs/2)**2/hhs
+R0hs = (dhs/2)**2/hhs  # heatshield radius of curvature
 
 m = 5357 / np.pi  # mass [kg]
 # x_lst = np.arange(-2, 2.1, 0.1) # x coords

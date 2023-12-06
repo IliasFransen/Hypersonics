@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def generate_heatshield_points(D, H, num_points=101):
+def generate_heatshield_points(D, H, num_points=20):
     # Parametric equations for an ellipse
+    dth = 0.0000001
     R=D/2
-    np.linspace(-R, R, num_points)
-    th = np.linspace(np.pi, 2*np.pi, num_points)
+    th = np.linspace(np.pi+dth, 2*np.pi-dth, num_points)
     x = R*np.cos(th)
     y = H*np.sin(th)
     # Apply curvature to the points
@@ -24,5 +24,5 @@ def plot_heatshield(x, y):
 # D = 2  # Replace with your actual value
 # H = 0.5  # Replace with your actual value
 #
-# x_points, y_points = generate_heatshield_points(D, H, 101)
+# x_points, y_points = generate_heatshield_points(D, H, 11)
 # plot_heatshield(x_points,y_points)
