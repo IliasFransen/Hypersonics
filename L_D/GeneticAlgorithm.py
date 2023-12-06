@@ -88,6 +88,7 @@ class GeneticAlgorithmOptimization:
         self.sc_params = sc_params
         self.atm_params = atm_params
         self.tspan = tspan
+
         hof = self.optimize()
 
         alpha = hof[0][0]
