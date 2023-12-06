@@ -12,7 +12,7 @@ class GeneticAlgorithmOptimization:
     # GA setup
 
     ngen = 3  # number of generations
-    nind = 12  # number of individuals
+    nind = 4  # number of individuals
     eta = 5.0  # SBX crossover operator
     mutpb = 0.5  # probability of mutation
     cxpb = 0.6  # probability of crossover
@@ -72,8 +72,8 @@ class GeneticAlgorithmOptimization:
         N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
 
-        L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
-        D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
+        L = Get_Lift(N, T, alpha)
+        D = Get_Drag(N, T, alpha)
 
         # constraints
         ng = np.sqrt(L** 2 + D** 2) / (m * g)  # load deceleration [g's]

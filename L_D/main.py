@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GeneticAlgorithm import GeneticAlgorithmOptimization
+from Atmosphereic_Conditions import Get_SoundSpeed
 from State_System import Get_VInit
 from scipy.integrate import simpson
 from heatshieldpoints import generate_heatshield_points
@@ -44,7 +45,8 @@ if __name__ == "__main__":
     D = np.zeros(len(t))
     ng = np.zeros(len(t))
     AOA = np.zeros(len(t))
-    
+    M = np.zeros(len(t))
+
     x = [ICs]
 
     for i in range(0, len(t) - 1):
@@ -55,6 +57,7 @@ if __name__ == "__main__":
         tspan = [t1, t2]
 
         opt, sol = GA.getSolution(x, atm_params, sc_params, tspan)  # run genetic algorithm to get optimum
+        a = Get_SoundSpeed(sol[-1,2])
 
         AOA[i] = opt[0]
         alpha = opt[0]
@@ -62,13 +65,14 @@ if __name__ == "__main__":
         D[i] = opt[2]
         q[i] = opt[3]
         ng[i] = opt[4]
+        M[i] = sol[-1, 0]/a
 
         Q[i] = simpson(q[0:i + 1], t[0:i + 1])
 
         x.append([sol[-1, 0], sol[-1, 1], sol[-1, 2]])
 
-        # Parachute height = 8 km, exit loop if h < 8 km
-        if sol[-1, 2] < 8000:
+        # At Mach 2 Newtonian breaks so stop simulation
+        if M[i] < 2:
             t = t[0:i + 1]
             q = q[0:i + 1]
             L = L[0:i + 1]
@@ -76,8 +80,19 @@ if __name__ == "__main__":
             Q = Q[0:i + 1]
             ng = ng[0:i + 1]
             AOA = AOA[0:i + 1]
-
+            M = M[0:i+1]
             break
+        # # Parachute height = 8 km, exit loop if h < 8 km
+        # if sol[-1, 2] < 8000:
+        #     t = t[0:i + 1]
+        #     q = q[0:i + 1]
+        #     L = L[0:i + 1]
+        #     D = D[0:i + 1]
+        #     Q = Q[0:i + 1]
+        #     ng = ng[0:i + 1]
+        #     AOA = AOA[0:i + 1]
+        #
+        #     break
         
     x = list(zip(*x))
 
@@ -85,62 +100,58 @@ if __name__ == "__main__":
     fpa = x[1]
     h = x[2]
 
+    if len(h) == len(t)+1:
+        V = V[0:-1]
+        fpa = fpa[0:-1]
+        h = h[0:-1]
+
     Vx = np.multiply(V, np.cos(fpa))
     Vy = np.multiply(V, np.sin(fpa))
-    # if len(h) == len(t)+1:
-    #     V = V[0:-1]
-    #     fpa = fpa[0:-1]
-    #     h = h[0:-1]
 
     plt.figure(1)
-    plt.plot(t, h)
-    plt.xlabel('t [s]')
-    plt.ylabel('Altitude [m]')
-    plt.tight_layout()
-
-    plt.figure(2)
-    plt.plot(t, V)
-    plt.xlabel('t [s]')
-    plt.ylabel('Velocity [m/s]')
-    plt.tight_layout()
-
-    plt.figure(3)
-    plt.plot(t, Vy)
-    plt.xlabel('t [s]')
-    plt.ylabel('Velocity y [m/s]')
-    plt.tight_layout()
-
-    plt.figure(4)
-    plt.plot(t, Vx)
-    plt.xlabel('t [s]')
-    plt.ylabel('Velocity x [m/s]')
-    plt.tight_layout()
-
-    plt.figure(5)
-    plt.plot(t, np.gradient(V, t))
-    plt.xlabel('t [s]')
-    plt.ylabel('Grad(Velocity)=a [m/s^2]')
-    plt.tight_layout()
-
-    plt.figure(6)
     plt.plot(V, h)
     plt.xlabel('V [m/s]')
     plt.ylabel('Altitude [m]')
     plt.tight_layout()
 
-    # plt.figure(5)
-    # plt.plot(q, h)
-    # plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
-    # plt.ylabel('Altitude [m]')
-    #
-    # plt.figure(6)
-    # plt.plot(Q, h)
-    # plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
-    # plt.ylabel('Altitude [m]')
-    #
-    # plt.figure(7)
-    # plt.plot(ng, h)
-    # plt.xlabel('Deceleration Load [g]')
-    # plt.ylabel('Altitude [m]')
+    plt.figure(2)
+    plt.plot(t, h)
+    plt.xlabel('t [s]')
+    plt.ylabel('Altitude [m]')
+    plt.tight_layout()
+
+    plt.figure(3)
+    plt.plot(t, V)
+    plt.xlabel('t [s]')
+    plt.ylabel('Velocity [m/s]')
+    plt.tight_layout()
+
+    plt.figure(4)
+    plt.plot(ng, h)
+    plt.xlabel('Deceleration Load [g]')
+    plt.ylabel('Altitude [m]')
+
+    plt.figure(5)
+    plt.plot(t, ng)
+    plt.xlabel('t [s]')
+    plt.ylabel('Deceleration Load [g]')
+    plt.tight_layout()
+
+    plt.figure(6)
+    plt.plot(h, M)
+    plt.xlabel('t [s]')
+    plt.ylabel('Mach number [-]')
+    plt.tight_layout()
+
+    plt.figure(7)
+    plt.plot(q, h)
+    plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
+    plt.ylabel('Altitude [m]')
+
+    plt.figure(8)
+    plt.plot(Q, h)
+    plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
+    plt.ylabel('Altitude [m]')
+
 
     plt.show()

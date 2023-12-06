@@ -16,16 +16,10 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
 
-        if alpha > 0:
-            if i > len(x_lst) / 2:
-                theta_temp = np.arctan(abs(slope)) - alpha
-            else:
-                theta_temp = np.arctan(abs(slope)) + alpha
+        if i+1 > len(x_lst) / 2:
+            theta_temp = np.arctan(abs(slope)) + alpha
         else:
-            if i > len(x_lst) / 2:
-                theta_temp = np.arctan(abs(slope)) + alpha
-            else:
-                theta_temp = np.arctan(abs(slope)) - alpha
+            theta_temp = np.arctan(abs(slope)) - alpha
 
         theta = np.append(theta, theta_temp)
 
@@ -79,13 +73,12 @@ def Get_CpMax(V: float, h: float, gamma: float):
 # Get_Normal gives the normal force working on the SC
 
 def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
-
     Cp_max = Get_CpMax(V, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     Cn = Cp_max * sin2th
 
-    N = Cn * Get_Density(h) * V**2
+    N = 1/2 * Cn * Get_Density(h) * V ** 2
 
     return N
 
@@ -99,12 +92,11 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     Cp_local = CP_max * np.sin(theta) ** 2
 
-    integral_left = simpson(Cp_local[:len(Cp_local) // 2 + 1], y[:len(Cp_local) // 2 + 1])
+    integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
 
-    integral_right = simpson(Cp_local[len(Cp_local) // 2 + 1:], y[len(Cp_local) // 2 + 1:])
+    integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
-    T = (integral_right - integral_left) * Get_Density(h) * V**2
-
+    T = 1/2 * (integral_right - integral_left) * Get_Density(h) * V**2
     return T
 
 

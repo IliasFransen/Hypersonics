@@ -7,13 +7,14 @@ from heatshieldpoints import generate_heatshield_points
 
 # Spacecraft parameters (temp values)
 dhs = 3.9116  # heatshield diameter (m)
-R0hs = 4.69392  # heatshield radius of curvature
+# R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
+R0hs = (dhs/2)**2/hhs  # heatshield radius of curvature
 
-m = 5347/np.pi  # mass [kg]
+m = 5357 / np.pi  # mass [kg]
 # x_lst = np.arange(-2, 2.1, 0.1) # x coords
 # y_lst = [(x/5)**2 for x in x_lst] # y coords
-x_lst, y_lst = generate_heatshield_points(R0hs, dhs, hhs)
+x_lst, y_lst = generate_heatshield_points(dhs, hhs)
 
 sc_params = [R0hs, m, x_lst, y_lst]
 
@@ -67,9 +68,6 @@ if __name__ == "__main__":
         Q[i] = simpson(q[0:i + 1], t[0:i + 1])
 
         x.append([sol[-1, 0], sol[-1, 1], sol[-1, 2]])
-        print(sol[-1,1])
-        
-        print(sol[-1,2])
 
         # Parachute height = 8 km, exit loop if h < 8 km
         if sol[-1, 2] < 8000:
