@@ -1,24 +1,34 @@
 import numpy as np
 from Modified_Newton import Get_Drag, Get_Lift, Get_Tangential, Get_Normal
+from Atmosphereic_Conditions import Get_Density
 
 
 # StateUpdate is gives the system of differential equations that needs to be S
 
 def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list):
     V, fpa, h = states
-
+    
     r = 6378 * 1000 + h
 
     N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
     T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
 
-    L = Get_Lift(N, T, alpha)
-    D = Get_Drag(N, T, alpha)
-
+    L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
+    D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
+    
+    """
     dVdt = -D / m - g * np.sin(fpa)
-    dfpadt = L / (V * m) - (g/V - V / r) * np.cos(fpa)
+    dfpadt = L / (V * m) - (g / V - V / r) * np.cos(fpa)
     dhdt = V*np.sin(fpa)
+    """
+    
+    B = 372 # Ballistic coeff.
+    rho = Get_Density(h)
 
+    dVdt = -rho * V**2 / (2 * B) + g * np.sin(fpa)
+    dfpadt = -rho * V * L/D / (2 * B) + g * np.cos(fpa) / V - V * np.cos(fpa) / r
+    dhdt = -V * np.sin(fpa)
+    
     return [dVdt, dfpadt, dhdt]
 
 
@@ -31,20 +41,3 @@ def Get_VInit(V0: float, fpa0: float):
     Vy0 = V0 * np.sin(fpa0)
 
     return Vx0, Vy0
-
-
-"""
-def Solver(V0 : float, beta0 : float, h0 : float, t: list, g : float, m : float, alpha : list, gamma : float, x_lst : list, y_lst : list):
-    Vx0 , Vy0 = Get_VInit(V0, beta0)
-    State0 = [Vx0, Vy0, h0]
-
-    param = (g, m, alpha, gamma, x_lst, y_lst) #doubt I can set array as a parameter
-
-    sol = odeint(StateUpdate,State0 , t, args=(param) )
-
-    return sol
-
-
-#TEST
-print(Solver(10000, 3.25, 100000, [0,1,2,3,4,5,6,7,8,9], 9.81, 1000, [0,0,0,0,0,0,0,0,0,0], 1.4, [-1,0,1], [0,0,0]))
-"""

@@ -1,9 +1,10 @@
+from asyncio.windows_events import NULL
 from math import isnan
 import numpy as np
 import random
 from deap import base, creator, tools, algorithms
 from Atmosphereic_Conditions import Get_Density
-from Modified_Newton import Get_Lift, Get_Drag, Get_Tangential, Get_Normal
+from Modified_Newton import Get_Lift, Get_Drag, Get_Tangential, Get_Normal, Get_LD
 from State_System import StateUpdate
 from scipy.integrate import odeint
 
@@ -11,54 +12,50 @@ from scipy.integrate import odeint
 class GeneticAlgorithmOptimization:
     # GA setup
 
-    ngen = 3  # number of generations
-    nind = 12  # number of individuals
+    ngen = 2  # number of generations
+    nind = 8 # number of individuals
     eta = 5.0  # SBX crossover operator
-    mutpb = 0.5  # probability of mutation
-    cxpb = 0.6  # probability of crossover
+    mutpb = 0.9  # probability of mutation
+    cxpb = 0.5  # probability of crossover
     nhof = 2  # hall of fame size
-
-    # control variable bounds
-
-    alpha_bounds = np.array([-10, 10]) * np.pi / 180  # AoA bounds [rad]
-    alpha_min = alpha_bounds[0]
-    alpha_max = alpha_bounds[1]
 
     # constraints
 
-    q_max = 2.5 * 10 ** 6  # max. stag. heat [W/m^2]
-    ng_max = 6.0  # max. g-load [g]
-
+    q_max = 3.5 * 10 ** 6  # max. stag. heat [W/m^2]
+    ng_max = 12.0  # max. g-load [g]
+    
+    # control variable bounds
+    """
+    alpha_bounds = np.array([-5, -2.5]) * np.pi / 180  # AoA bounds [rad]
+    alpha_min = alpha_bounds[0]
+    alpha_max = alpha_bounds[1]
+    """
     # Sutton-Graves stagnation point heat transfer coefficient for earth
     k = 1.7415 * 10 ** (-4)
 
     def __init__(self):
 
         random.seed(64)
-
-        alpha_min = self.alpha_min
-        alpha_max = self.alpha_max
-        eta = self.eta
-
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", list, fitness=creator.FitnessMin)
+        
+        creator.create("FitnessMulti", base.Fitness, weights=(-1.0,-1.0))
+        creator.create("Individual", list, fitness=creator.FitnessMulti)
 
         self.toolbox = base.Toolbox()
         toolbox = self.toolbox
         evaluate = self.evaluate
         check_feasibility = self.check_feasibility
 
-        toolbox.register("alpha", random.uniform, alpha_min, alpha_max)
-        toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.alpha, n=1)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         toolbox.register("evaluate", evaluate)
-        toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=alpha_min, up=alpha_max, eta=eta)
-        toolbox.register("mutate", tools.mutPolynomialBounded, low=alpha_min, up=alpha_max, eta=eta, indpb=0.2)
         toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasibility, 1E10))
         toolbox.register("select", tools.selNSGA2)
+        
 
-    def solve(self, alpha, V, h, fpa):
+    def solve(self, alpha):
 
+        V = self.x[0]
+        fpa = self.x[1]
+        h = self.x[2]
+        
         g = self.atm_params[0]
         gamma = self.atm_params[1]
 
@@ -68,27 +65,50 @@ class GeneticAlgorithmOptimization:
         m = self.sc_params[1]
         x_lst = self.sc_params[2]
         y_lst = self.sc_params[3]
+        
+        x0 = self.x
+        
+        args = (g, m, alpha, gamma, x_lst, y_lst)
+        sol = odeint(StateUpdate, x0, self.tspan, args=args)
+
+        V = sol[-1, 0]
+        fpa= sol[-1, 0]
+        h = sol[-1, 2]
 
         N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
 
         L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
         D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
+        
+        dVdt = StateUpdate([V, fpa, h], NULL, g, m, alpha, gamma, x_lst, y_lst)[0]
 
         # constraints
-        ng = np.sqrt(L** 2 + D** 2) / (m * g)  # load deceleration [g's]
+        ng = abs(dVdt) / g  # load deceleration [g's]
 
         q = self.k * np.sqrt((rho / R0)) * pow(V, 3)  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
-
+       
         return [alpha, L, D, q, ng]
 
-    def getSolution(self, x, atm_params, sc_params, tspan):
+    def getSolution(self, x, atm_params, sc_params, tspan, alpha):
+        
+        dt = tspan[1] - tspan[0]        
+
+        alpha_min = alpha - 0.1 * np.pi / 180 / dt
+        alpha_max = alpha + 0.1 * np.pi / 180 / dt
+        eta = self.eta
+
+        toolbox = self.toolbox
+        toolbox.register("alpha", random.uniform, alpha_min, alpha_max)
+        toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.alpha, n=1)
+        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=alpha_min, up=alpha_max, eta=eta)
+        toolbox.register("mutate", tools.mutPolynomialBounded, low=alpha_min, up=alpha_max, eta=eta, indpb=0.05)
 
         self.x = x[-1]
         self.sc_params = sc_params
         self.atm_params = atm_params
         self.tspan = tspan
-
         hof = self.optimize()
 
         alpha = hof[0][0]
@@ -105,11 +125,7 @@ class GeneticAlgorithmOptimization:
         args = (g, m, alpha, gamma, x_lst, y_lst)
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
-        V = sol[-1, 0]
-        fpa = sol[-1, 1]
-        h = sol[-1, 2]
-
-        opt = self.solve(alpha, V, h, fpa)
+        opt = self.solve(alpha)
 
         return opt, sol
 
@@ -122,16 +138,8 @@ class GeneticAlgorithmOptimization:
         NGEN = self.ngen
         CXPB = self.cxpb
         MUTPB = self.mutpb
-        
-        """
-        hof = tools.HallOfFame(self.nhof)
-        
-        algorithms.eaSimple(pop, toolbox, cxpb=CXPB, mutpb=MUTPB, ngen=NGEN, halloffame=hof, verbose=False)
-        
-        return hof
-        """
-        
-        pareto = tools.ParetoFront()       
+
+        pareto = tools.ParetoFront()      
         pareto.clear()
 
         invalid_ind = [ind for ind in pop if not ind.fitness.valid]
@@ -176,32 +184,11 @@ class GeneticAlgorithmOptimization:
 
         alpha = params[0]
 
-        g = self.atm_params[0]
-        gamma = self.atm_params[1]
-
-        m = self.sc_params[1]
-        x_lst = self.sc_params[2]
-        y_lst = self.sc_params[3]
-
-        tspan = self.tspan
-
-        x0 = self.x
-
-        args = (g, m, alpha, gamma, x_lst, y_lst)
-
-        sol = odeint(StateUpdate, x0, tspan, args=args)
-
-        V = sol[-1, 0]
-        fpa = sol[-1, 1]
-        h = sol[-1, 2]
-
-        opt = self.solve(alpha, V, h, fpa)
+        opt = self.solve(alpha)
 
         q = opt[3]
         ng = opt[4]
 
-        if isnan(q):
-            return False
         if ng > self.ng_max:
             print('ng failed: ng = %.5f' % ng)
             return False
@@ -218,33 +205,9 @@ class GeneticAlgorithmOptimization:
 
         alpha = params[0]
 
-        g = self.atm_params[0]
-        gamma = self.atm_params[1]
-
-        m = self.sc_params[1]
-        x_lst = self.sc_params[2]
-        y_lst = self.sc_params[3]
-
-        x0 = self.x
-        tspan = self.tspan
-
-        args = (g, m, alpha, gamma, x_lst, y_lst)
-
-        sol = odeint(StateUpdate, x0, tspan, args=args)
-
-        V = sol[-1, 0]
-        fpa = sol[-1, 1]
-        h = sol[-1, 2]
-
-        weights = [0.4, 0.6]
-
-        opt = self.solve(alpha, V, h, fpa)
+        opt = self.solve(alpha)
 
         q = opt[3]
         ng = opt[4]
 
-        objectives = [q, ng]
-
-        objfcn = sum(x * y for x, y in zip(weights, objectives)) / sum(weights)  # weighted sum average objective function
-        
-        return objfcn,
+        return q, ng
