@@ -133,11 +133,11 @@ def Get_LD(V : float, h : float, alpha : float):
 
     Cpmax = Get_CpMax(V, h, 1.4)
     q = 0.5 * Get_Density(h) * V**2
-    
+
     CD = Cpmax * np.sin(alpha)**2 * np.cos(alpha)
     CL = Cpmax * np.sin(alpha)**3
     
-    L = q * CL * 12
-    D = q * CD * 12
+    L = q * CL
+    D = q * CD
     
     return L, D
