@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GeneticAlgorithm import GeneticAlgorithmOptimization
-from State_System import Get_VInit
-from scipy.integrate import simpson, trapezoid
+from GlobalGeneticAlgorithm import GlobalGeneticAlgorithmOptimization
+from Modified_Newton import Get_LD
+from State_System import getGForce, getStagHeatFlux, getStagHeatLoad
 from heatshieldpoints import generate_heatshield_points
-from Atmosphereic_Conditions import Get_SoundSpeed
+from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
 
 # Spacecraft parameters (temp values)
 dhs = 3.9116  # heatshield diameter (m)
@@ -12,92 +12,64 @@ R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
 
 m = 5357 # mass [kg]
-# x_lst = np.arange(-2, 2.1, 0.1) # x coords
-# y_lst = [(x/5)**2 for x in x_lst] # y coords
 x_lst, y_lst = generate_heatshield_points(R0hs, dhs, hhs)
 
 sc_params = [R0hs, m, x_lst, y_lst]
 
-# ICs (temps values)
-h0 = 120000  # initial altitude [m]
+# ICs 
+h0 = 125000 # initial altitude [m]
 fpa0 = 6.5 * np.pi/180 # reentry angle [rad]
 V0 = 11000  # initial velocity magnitude [m/s]
 
 ICs = [V0, fpa0, h0]  # initial conditions vector
 
-# control var
+alpha0 = 0 * np.pi/180 # initial AoA [rad]
 
-alpha = 18 * np.pi/180  # AoA [rad], to be optimized
+alpha_min = -5 * np.pi/180
+alpha_max = 5 * np.pi/180
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
 
-atm_params = [g, gamma]
+k = 1.7415E-4 # Sutton-Graves stagnation point heat transfer coefficient for earth
+
+atm_params = [g, gamma, k]
 
 if __name__ == "__main__":
     
-    GA = GeneticAlgorithmOptimization()
+    GA = GlobalGeneticAlgorithmOptimization()
     
-    #t = np.linspace(0, 1000, 51)
-    t = np.arange(0, 510, 1)
-    q = np.zeros(len(t))
-    Q = np.zeros(len(t))
-    L = np.zeros(len(t))
-    D = np.zeros(len(t))
-    ng = np.zeros(len(t))
-    AOA = np.zeros(len(t))
-    M = np.zeros(len(t))
+    dt = 1
+    t = np.arange(0, 600, dt)
+    
+    dalpha = 0.1 * np.pi / 180 * dt 
+
+    # solve t = 0 stuff
+    
+    AoA0 = alpha0
+    L0, D0 = Get_LD(V0, h0, gamma, x_lst, y_lst, alpha0)
+    M0 = V0 / Get_SoundSpeed(h0)
+    q0 = getStagHeatFlux(k, R0hs, Get_Density(h0), V0)
+    Q0 = getStagHeatLoad([q0], t, 0)
+    ng0 = getGForce(0, g)
     
     x = [ICs]
-
-    for i in range(0, len(t) - 1):
-        
-        print(t[i])
-        t1 = t[i]
-        t2 = t[i+1]
-        tspan = [t1, t2]
-
-        opt, sol = GA.getSolution(x, atm_params, sc_params, tspan, alpha)  # run genetic algorithm to get optimum
-        
-        AOA[i] = opt[0]
-        alpha = opt[0]
-        L[i] = opt[1]
-        D[i] = opt[2]
-        q[i] = opt[3]
-        ng[i] = opt[4]
-        
-        Q[i] = simpson(q[0:i + 1], t[0:i + 1])
-
-        x.append([sol[-1, 0], sol[-1, 1], sol[-1, 2]])
-        
-        print(sol[-1,2])
-        
-        a = Get_SoundSpeed(sol[-1, 2])
-        M[i] = sol[-1, 0] / a
-        print(M[i])
-
-        if M[i] < 2:
-            t = t[0:i + 1]
-            q = q[0:i + 1]
-            L = L[0:i + 1]
-            D = D[0:i + 1]
-            Q = Q[0:i + 1]
-            ng = ng[0:i + 1]
-            AOA = AOA[0:i + 1]
-            M = M[0:i + 1]
-            break
-        
-    x = list(zip(*x))
-
-    V = x[0]
-    fpa = x[1]
-    h = x[2]
-
-    if len(h) == len(t)+1:
-        V = V[0:-1]
-        fpa = fpa[0:-1]
-        h = h[0:-1]
-
+    
+    opt = GA.getSolution(x, atm_params, sc_params, t, alpha_min, alpha_max, dalpha)
+    
+    AoA = opt[0]; AoA.insert(0, AoA0); AoA = np.array(AoA)
+    L = opt[1]; L[0] = L0
+    D = opt[2]; D[0] = D0
+    q = opt[3]; q[0] = q0
+    ng = opt[4]; ng[0] = ng0
+    Q = opt[5]; Q[0] = Q0
+    V = opt[6]; V[0] = V0
+    h = opt[7]; h[0] = h0
+    M = opt[8]; M[0] = M0
+    
+    t = t[0:len(ng)]
+    AoA = AoA[0:len(t)]
+    
     plt.figure(1)
     plt.plot(t, h)
     plt.xlabel('t [s]')
@@ -144,8 +116,8 @@ if __name__ == "__main__":
     plt.ylabel(r'$\frac{L}{D}$')
     
     plt.figure(10)
-    plt.plot(t, AOA * 180/np.pi)
+    plt.plot(t, AoA * 180/np.pi)
     plt.xlabel('t [s]')
     plt.ylabel(r'$\alpha$ [deg]')
-
+    
     plt.show()

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def generate_heatshield_points(radius_of_curvature, diameter, height, num_points=100):
+def generate_heatshield_points(radius_of_curvature, diameter, height, num_points=20):
     # Parametric equations for an ellipse
     theta = np.linspace(0, 2*np.pi, num_points)
     x = diameter/2 * np.cos(theta)

@@ -1,6 +1,7 @@
 import numpy as np
 from Modified_Newton import Get_Drag, Get_Lift, Get_Tangential, Get_Normal
 from Atmosphereic_Conditions import Get_Density
+from scipy.integrate import simpson
 
 
 # StateUpdate is gives the system of differential equations that needs to be S
@@ -31,7 +32,6 @@ def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: 
     
     return [dVdt, dfpadt, dhdt]
 
-
 # Get_VInit gives intial velocities, fpa must be measured from POSITIVE X AXIS
 
 def Get_VInit(V0: float, fpa0: float):
@@ -41,3 +41,21 @@ def Get_VInit(V0: float, fpa0: float):
     Vy0 = V0 * np.sin(fpa0)
 
     return Vx0, Vy0
+
+def getStagHeatFlux(k : float, R0 : float, rho : float, V : float):
+    
+    q = k * np.sqrt(rho/R0) * V**3
+    
+    return q
+
+def getStagHeatLoad(q : list, t : list, i : int):
+    
+    Q = simpson(q[0:i + 1], t[0:i + 1])
+    
+    return Q
+
+def getGForce(dVdt : float, g : float):
+    
+    ng = abs(dVdt) / g
+    
+    return ng

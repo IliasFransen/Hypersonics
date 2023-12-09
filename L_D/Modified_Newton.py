@@ -84,7 +84,7 @@ def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha
 
     N = 0.5 * Cn * Get_Density(h) * V**2 * np.pi * 3.9116/2
 
-    return Cn
+    return Cn / 3.9116
 
 
 def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
@@ -102,7 +102,7 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     T = 0.5 * (integral_right - integral_left) * Get_Density(h) * V**2 * np.pi * 3.9116/2
 
-    return integral_right - integral_left
+    return (integral_right - integral_left) / 0.635
 
 
 def Get_Lift(N: float, T: float, V : float, h : float, alpha: float, x_lst : list, y_lst : list):
@@ -128,16 +128,39 @@ def Get_Drag(N: float, T: float, V : float, h : float, alpha: float, x_lst : lis
     #D = 0.5 * Get_Density(h) * V**2 * Cd * 12
     return D
 
+def Get_length(x_lst: list, y_lst: list):
+    x,y = Get_MidPoints(x_lst, y_lst)
 
-def Get_LD(V : float, h : float, alpha : float):
+    lengths = np.array([])
+    for i in range(len(x)-1):
+        leng = ((x[i]-x[i+1])**2 + (y[i]-y[i+1])**2)**0.5
+        lengths = np.append(lengths,leng)
+
+    middle_ind = int(np.floor(len(lengths)/2))
+    lengths = np.delete(lengths,middle_ind)
+
+    return np.sum(lengths)
+
+def Get_LD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
     Cpmax = Get_CpMax(V, h, 1.4)
     q = 0.5 * Get_Density(h) * V**2
-
-    CD = Cpmax * np.sin(alpha)**2 * np.cos(alpha)
+    CD=1.2
+    #CD = Cpmax * np.sin(alpha)**2 * np.cos(alpha)
     CL = Cpmax * np.sin(alpha)**3
+    """
+    T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
+
+    L = N*np.cos(alpha) - T*np.sin(alpha)
+    D = T*np.cos(alpha) + N * np.sin(alpha)
     
-    L = q * CL
-    D = q * CD
+    S = Get_length(x_lst,y_lst)
+
+    CL = 2*L/(Get_Density(h)*(V**2)*S)
+    CD = 2*D/(Get_Density(h)*(V**2)*S)
+    """
+    L = q * CL * np.pi/4 * 3.9116**2 
+    D = q * CD * np.pi/4 * 3.9116**2 
     
     return L, D
