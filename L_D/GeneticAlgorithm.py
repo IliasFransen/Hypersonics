@@ -21,23 +21,19 @@ class GeneticAlgorithmOptimization:
 
     # constraints
 
-    q_max = 3.5 * 10 ** 6  # max. stag. heat [W/m^2]
-    ng_max = 6.0  # max. g-load [g]
+    q_max = 5.5 * 10 ** 6  # max. stag. heat [W/m^2]
+    ng_max = 12.0  # max. g-load [g]
 
     # control variable bounds
-    """
-    alpha_bounds = np.array([-5, -2.5]) * np.pi / 180  # AoA bounds [rad]
-    alpha_min = alpha_bounds[0]
-    alpha_max = alpha_bounds[1]
-    """
+
     # Sutton-Graves stagnation point heat transfer coefficient for earth
     k = 1.7415 * 10 ** (-4)
 
     def __init__(self):
 
         random.seed(64)
-
-        creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -1.0))
+        
+        creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -2.0))
         creator.create("Individual", list, fitness=creator.FitnessMulti)
 
         self.toolbox = base.Toolbox()
@@ -76,9 +72,11 @@ class GeneticAlgorithmOptimization:
 
         N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+        
+        L, D = Get_LD(V, h, gamma, x_lst, y_lst, alpha)
 
-        L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
-        D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
+        #L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
+        #D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
 
         dVdt = StateUpdate([V, fpa, h], NULL, g, m, alpha, gamma, x_lst, y_lst)[0]
 

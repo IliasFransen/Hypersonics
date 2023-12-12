@@ -31,16 +31,16 @@ alpha_max = 5 * np.pi/180
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
 
-k = 1.7415E-4 # Sutton-Graves stagnation point heat transfer coefficient for earth
+Pr = 0.74 # Prandtl number
 
-atm_params = [g, gamma, k]
+atm_params = [g, gamma, Pr]
 
 if __name__ == "__main__":
     
     GA = GlobalGeneticAlgorithmOptimization()
     
     dt = 1
-    t = np.arange(0, 600, dt)
+    t = np.arange(0, 1500, dt)
     
     dalpha = 0.1 * np.pi / 180 * dt 
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     AoA0 = alpha0
     L0, D0 = Get_LD(V0, h0, gamma, x_lst, y_lst, alpha0)
     M0 = V0 / Get_SoundSpeed(h0)
-    q0 = getStagHeatFlux(k, R0hs, Get_Density(h0), V0)
+    q0 = getStagHeatFlux(h0, M0, gamma, Pr, R0hs)
     Q0 = getStagHeatLoad([q0], t, 0)
     ng0 = getGForce(0, g)
     
@@ -117,7 +117,13 @@ if __name__ == "__main__":
     
     plt.figure(10)
     plt.plot(t, AoA * 180/np.pi)
+    plt.ylim([-10, 10])
     plt.xlabel('t [s]')
     plt.ylabel(r'$\alpha$ [deg]')
+    
+    plt.figure(11)
+    plt.plot(t, np.gradient(AoA * 180/np.pi))
+    plt.xlabel('t [s]')
+    plt.ylabel(r'$\frac{d\alpha}{dt}$ [deg/s]')
     
     plt.show()

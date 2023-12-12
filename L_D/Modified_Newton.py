@@ -148,18 +148,18 @@ def Get_LD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: fl
     CD=1.2
     #CD = Cpmax * np.sin(alpha)**2 * np.cos(alpha)
     CL = Cpmax * np.sin(alpha)**3
-    """
+    
     T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
     N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
 
-    L = N*np.cos(alpha) - T*np.sin(alpha)
-    D = T*np.cos(alpha) + N * np.sin(alpha)
+    #CL = N*np.cos(alpha) - T*np.sin(alpha)
+    #CD = T*np.cos(alpha) + N * np.sin(alpha)
     
-    S = Get_length(x_lst,y_lst)
+    #S = Get_length(x_lst,y_lst)
 
-    CL = 2*L/(Get_Density(h)*(V**2)*S)
-    CD = 2*D/(Get_Density(h)*(V**2)*S)
-    """
+    #CL = 2*L/(Get_Density(h)*(V**2)*S)
+    #CD = 2*D/(Get_Density(h)*(V**2)*S)
+    
     L = q * CL * np.pi/4 * 3.9116**2 
     D = q * CD * np.pi/4 * 3.9116**2 
     

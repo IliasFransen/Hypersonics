@@ -21,7 +21,7 @@ class GlobalGeneticAlgorithmOptimization:
 
     q_max = 2.5E6 # max. stagnation point heat flux [W/m^2]
     Q_max = 5.1E8 # max. stagnation point heat load [J/m^2]
-    ng_max = 6.0  # max. g-load [g]
+    ng_max = 6.5  # max. g-load [g]
 
     def __init__(self):
 
@@ -45,7 +45,7 @@ class GlobalGeneticAlgorithmOptimization:
         
         g = self.atm_params[0]
         gamma = self.atm_params[1]
-        k = self.atm_params[2]
+        Pr = self.atm_params[2]
 
         R0 = self.sc_params[0]
         m = self.sc_params[1]
@@ -88,17 +88,17 @@ class GlobalGeneticAlgorithmOptimization:
 
             dVdt = StateUpdate([V[i], fpa[i], h[i]], NULL, g, m, alphas[i], gamma, x_lst, y_lst)[0]
 
+            a = Get_SoundSpeed(sol[-1, 2])
+            M[i] = sol[-1, 0] / a   # Mach number
+
             # constraints
             ng[i] = getGForce(dVdt, g)  # load deceleration [g's]
 
-            q[i] = getStagHeatFlux(k, R0, rho, V[i])  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
+            q[i] = getStagHeatFlux(h[i], M[i], gamma, Pr, R0)  # Sutton-Graves stagnation point heat flux approximation [W/m^2]
             
             Q[i] = getStagHeatLoad(q, t, i)  # heat load
             
             x0.append([V[i], fpa[i], h[i]])
-
-            a = Get_SoundSpeed(sol[-1, 2])
-            M[i] = sol[-1, 0] / a   # Mach number
 
             # Break solver loop if Mach < 2
             if M[i] < 2:

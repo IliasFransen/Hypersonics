@@ -10,10 +10,16 @@ def Get_SoundSpeed (h: float):
     a = (287*1.4*properies.T)**0.5
     return float(a)
 
-
 #Get_Density gives the density at a certain altitiude
 
 def Get_Density(h: float):
     properies = isa.ATMOSPHERE_1976(h, dT=0.0)
     rho = properies.rho
     return float(rho)
+
+def Get_Temperature(h : float):
+    
+    properties = isa.ATMOSPHERE_1976(h, dT=0.0)
+    T = properties.T
+    
+    return T
