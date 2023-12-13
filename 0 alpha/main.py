@@ -33,7 +33,7 @@ Pr = 0.74  # Prandtl number
 atm_params = [g, gamma, Pr]
 
 dt = 1
-t = np.arange(0, 500, dt)
+t = np.arange(0, 270, dt)
 
 # solve t = 0 stuff
 
@@ -53,50 +53,67 @@ M = np.zeros(len(V))
 q = np.zeros(len(V))
 Q = np.zeros(len(V))
 
+
 for i in range(len(V)):
     [dVdt[i], dfpadt[i], dhdt[i], dxdt[i]] = StateUpdate([V[i], fpa[i], h[i], x[i]], t, g, m, gamma, x_lst, y_lst, S)
     M[i] = V[i] / Get_SoundSpeed(h[i])
     q[i] = getStagHeatFlux(h[i], M[i], gamma, Pr, R0hs)
+    if M[i] < 3:
+        break
 
-for i in range(len(V)):
+for i in range(len(M)):
     Q[i] = getStagHeatLoad(q, t, i)
 
 ng = -dVdt/g
 
+V = V[0:len(M)]
+fpa = fpa[0:len(M)]
+h = h[0:len(M)]
+x = x[0:len(M)]
 
-plt.figure(1)
-plt.plot(t, h)
-plt.xlabel('t [s]')
-plt.ylabel('Altitude [m]')
+dVdt = dVdt[0:len(M)]
+dfpadt = dfpadt[0:len(M)]
+dhdt = dhdt[0:len(M)]
+dxdt = dxdt[0:len(M)]
 
+q = q[0:len(M)]
+
+t = t[0:len(M)]
+
+
+# plt.figure(1)
+# plt.plot(t, h)
+# plt.xlabel('t [s]')
+# plt.ylabel('Altitude [m]')
+#
 plt.figure(2)
 plt.plot(t, V)
 plt.xlabel('t [s]')
 plt.ylabel('Velocity [m/s]')
 
-plt.figure(3)
-plt.plot(V, h)
-plt.xlabel('V [m/s]')
-plt.ylabel('Altitude [m]')
+# plt.figure(3)
+# plt.plot(V, h)
+# plt.xlabel('V [m/s]')
+# plt.ylabel('Altitude [m]')
 
-plt.figure(5)
-plt.plot(q, h)
-plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
-plt.ylabel('Altitude [m]')
-
-plt.figure(6)
-plt.plot(Q, h)
-plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
-plt.ylabel('Altitude [m]')
-
-plt.figure(7)
-plt.plot(ng, h)
-plt.xlabel('Deceleration Load [g]')
-plt.ylabel('Altitude [m]')
-
-plt.figure(8)
-plt.plot(t, ng)
-plt.xlabel('t [s]')
-plt.ylabel('Deceleration Load [g]')
+# plt.figure(5)
+# plt.plot(q, h)
+# plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
+# plt.ylabel('Altitude [m]')
+#
+# plt.figure(6)
+# plt.plot(Q, h)
+# plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
+# plt.ylabel('Altitude [m]')
+#
+# plt.figure(7)
+# plt.plot(ng, h)
+# plt.xlabel('Deceleration Load [g]')
+# plt.ylabel('Altitude [m]')
+#
+# plt.figure(8)
+# plt.plot(t, ng)
+# plt.xlabel('t [s]')
+# plt.ylabel('Deceleration Load [g]')
 
 plt.show()
