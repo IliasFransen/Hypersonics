@@ -1,36 +1,37 @@
 import numpy as np
-from Modified_Newton import Get_Drag, Get_Lift, Get_Tangential, Get_Normal
+from Modified_Newton import Get_LD, Get_CLCD
 from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed, Get_Temperature
 from scipy.integrate import simpson
 
 
 # StateUpdate is gives the system of differential equations that needs to be S
 
-def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list):
-    V, fpa, h = states
-    
-    r = 6378 * 1000 + h
+def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list, S):
+    V, fpa, h, d = states
+    Re = 6378 * 1000
+    r = Re + h
 
-    N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    g = g*(Re/r)**2
 
-    L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
-    D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
-    
-    """
+    CL, CD = Get_CLCD(V, h, gamma, x_lst, y_lst, alpha)
+
+    L, D = Get_LD(CL, CD, V, h, S)
+
     dVdt = -D / m - g * np.sin(fpa)
     dfpadt = L / (V * m) - (g / V - V / r) * np.cos(fpa)
-    dhdt = V*np.sin(fpa)
-    """
-    
-    B = 372 # Ballistic coeff.
+    dhdt = V * np.sin(fpa)
+    dxdt = V * np.cos(fpa)
+    """"
+    B = m/(CD*S) # Ballistic coeff.
     rho = Get_Density(h)
-
-    dVdt = -rho * V**2 / (2 * B)
-    dfpadt = -rho * V * L/D / (2 * B) + g * np.cos(fpa) / V - V * np.cos(fpa) / r
-    dhdt = -V * np.sin(fpa)
     
-    return [dVdt, dfpadt, dhdt]
+    dVdt = -rho * V**2 / (2 * B)
+    dfpadt = -rho * V * CL/CD / (2 * B) + g * np.cos(fpa) / V - V * np.cos(fpa) / r
+    dhdt = V * np.sin(fpa)
+    dxdt = V * np.cos(fpa)
+    """
+
+    return [dVdt, dfpadt, dhdt, dxdt]
 
 # Get_VInit gives intial velocities, fpa must be measured from POSITIVE X AXIS
 

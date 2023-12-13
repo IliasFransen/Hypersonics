@@ -13,7 +13,7 @@ class GeneticAlgorithmOptimization:
     # GA setup
 
     ngen = 2  # number of generations
-    nind = 8  # number of individuals
+    nind = 4  # number of individuals
     eta = 5.0  # SBX crossover operator
     mutpb = 0.9  # probability of mutation
     cxpb = 0.5  # probability of crossover
@@ -32,7 +32,7 @@ class GeneticAlgorithmOptimization:
     def __init__(self):
 
         random.seed(64)
-        
+
         creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -2.0))
         creator.create("Individual", list, fitness=creator.FitnessMulti)
 
@@ -50,6 +50,7 @@ class GeneticAlgorithmOptimization:
         V = self.x[0]
         fpa = self.x[1]
         h = self.x[2]
+        x = self.x[3]
 
         g = self.atm_params[0]
         gamma = self.atm_params[1]
@@ -60,25 +61,25 @@ class GeneticAlgorithmOptimization:
         m = self.sc_params[1]
         x_lst = self.sc_params[2]
         y_lst = self.sc_params[3]
+        S = self.sc_params[4]
 
         x0 = self.x
 
-        args = (g, m, alpha, gamma, x_lst, y_lst)
+        args = (g, m, alpha, gamma, x_lst, y_lst, S)
         sol = odeint(StateUpdate, x0, self.tspan, args=args)
 
         V = sol[-1, 0]
-        fpa = sol[-1, 0]
+        fpa = sol[-1, 1]
         h = sol[-1, 2]
+        x = sol[-1, 3]
 
         N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
         T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
-        
-        L, D = Get_LD(V, h, gamma, x_lst, y_lst, alpha)
 
-        #L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
-        #D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
+        L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
+        D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
 
-        dVdt = StateUpdate([V, fpa, h], NULL, g, m, alpha, gamma, x_lst, y_lst)[0]
+        dVdt = StateUpdate([V, fpa, h, x], NULL, g, m, alpha, gamma, x_lst, y_lst, S)[0]
 
         # constraints
         ng = abs(dVdt) / g  # load deceleration [g's]
@@ -116,10 +117,11 @@ class GeneticAlgorithmOptimization:
         m = self.sc_params[1]
         x_lst = self.sc_params[2]
         y_lst = self.sc_params[3]
+        S = self.sc_params[4]
 
         x0 = self.x
 
-        args = (g, m, alpha, gamma, x_lst, y_lst)
+        args = (g, m, alpha, gamma, x_lst, y_lst, S)
         sol = odeint(StateUpdate, x0, tspan, args=args)
 
         opt = self.solve(alpha)

@@ -8,20 +8,26 @@ from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
 
 # Spacecraft parameters (temp values)
 dhs = 3.9116  # heatshield diameter (m)
-R0hs = 4.69392  # heatshield radius of curvature
+# R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
+R0hs = (dhs/2)**2/hhs
+S = np.pi*(dhs/2)**2
 
-m = 5357 # mass [kg]
-x_lst, y_lst = generate_heatshield_points(R0hs, dhs, hhs)
+m = 5357  # mass [kg]
+# x_lst = np.arange(-2, 2.1, 0.1) # x coords
+# y_lst = [(x/5)**2 for x in x_lst] # y coords
+x_lst, y_lst = generate_heatshield_points(dhs, hhs)
 
-sc_params = [R0hs, m, x_lst, y_lst]
 
-# ICs 
-h0 = 125000 # initial altitude [m]
-fpa0 = 6.5 * np.pi/180 # reentry angle [rad]
+sc_params = [R0hs, m, x_lst, y_lst, S]
+
+# ICs (temps values)
 V0 = 11000  # initial velocity magnitude [m/s]
+fpa0 = -6.5 * np.pi/180 # reentry angle [rad]
+h0 = 120000  # initial altitude [m]
+x0 = 0
 
-ICs = [V0, fpa0, h0]  # initial conditions vector
+ICs = [V0, fpa0, h0, x0]  # initial conditions vector
 
 alpha0 = 0 * np.pi/180 # initial AoA [rad]
 
@@ -38,14 +44,14 @@ atm_params = [g, gamma, Pr]
 if __name__ == "__main__":
     
     GA = GlobalGeneticAlgorithmOptimization()
-    
+
     dt = 1
     t = np.arange(0, 1500, dt)
     
-    dalpha = 0.1 * np.pi / 180 * dt 
+    dalpha = 0.1 * np.pi / 180 * dt
 
     # solve t = 0 stuff
-    
+
     AoA0 = alpha0
     L0, D0 = Get_LD(V0, h0, gamma, x_lst, y_lst, alpha0)
     M0 = V0 / Get_SoundSpeed(h0)
@@ -54,9 +60,9 @@ if __name__ == "__main__":
     ng0 = getGForce(0, g)
     
     x = [ICs]
-    
+
     opt = GA.getSolution(x, atm_params, sc_params, t, alpha_min, alpha_max, dalpha)
-    
+
     AoA = opt[0]; AoA.insert(0, AoA0); AoA = np.array(AoA)
     L = opt[1]; L[0] = L0
     D = opt[2]; D[0] = D0
@@ -66,10 +72,10 @@ if __name__ == "__main__":
     V = opt[6]; V[0] = V0
     h = opt[7]; h[0] = h0
     M = opt[8]; M[0] = M0
-    
+
     t = t[0:len(ng)]
     AoA = AoA[0:len(t)]
-    
+
     plt.figure(1)
     plt.plot(t, h)
     plt.xlabel('t [s]')
@@ -120,10 +126,10 @@ if __name__ == "__main__":
     plt.ylim([-10, 10])
     plt.xlabel('t [s]')
     plt.ylabel(r'$\alpha$ [deg]')
-    
+
     plt.figure(11)
     plt.plot(t, np.gradient(AoA * 180/np.pi))
     plt.xlabel('t [s]')
     plt.ylabel(r'$\frac{d\alpha}{dt}$ [deg/s]')
-    
+
     plt.show()

@@ -94,7 +94,7 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
     Ct = (integral_right - integral_left) / c
 
     L = 1/2 * Ct * Get_Density(h) * V**2 * S
-    return Ct
+    return L
 
 def Get_length(x_lst: list, y_lst: list):
     x,y = Get_MidPoints(x_lst, y_lst)

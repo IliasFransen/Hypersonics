@@ -61,6 +61,7 @@ for i in range(len(V)):
     if M[i] < 3:
         break
 
+M = M[M>=3]
 for i in range(len(M)):
     Q[i] = getStagHeatLoad(q, t, i)
 
