@@ -89,20 +89,20 @@ q = q[0:len(M)]
 t = t[0:len(M)]
 
 
-plt.figure(1)
-plt.plot(t, h)
-plt.xlabel('t [s]')
-plt.ylabel('Altitude [m]')
+# plt.figure(1)
+# plt.plot(t, h)
+# plt.xlabel('t [s]')
+# plt.ylabel('Altitude [m]')
 #
 # plt.figure(2)
 # plt.plot(t, V)
 # plt.xlabel('t [s]')
 # plt.ylabel('Velocity [m/s]')
 #
-# plt.figure(3)
-# plt.plot(V, h)
-# plt.xlabel('V [m/s]')
-# plt.ylabel('Altitude [m]')
+plt.figure(3)
+plt.plot(V, h)
+plt.xlabel('V [m/s]')
+plt.ylabel('Altitude [m]')
 
 # plt.figure(5)
 # plt.plot(q, h)

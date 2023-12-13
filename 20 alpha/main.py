@@ -25,7 +25,7 @@ x0 = 0
 
 ICs = [V0, fpa0, h0, x0]  # initial conditions vector
 
-alpha0 = 1 * np.pi/180  # initial AoA [rad]
+alpha0 = -20 * np.pi/180  # initial AoA [rad]
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
@@ -55,7 +55,9 @@ M = np.zeros(len(V))
 q = np.zeros(len(V))
 Q = np.zeros(len(V))
 L = np.zeros(len(V))
+Cl = np.zeros(len(V))
 D = np.zeros(len(V))
+Cd = np.zeros(len(V))
 Ct = np.zeros(len(V))
 Cn = np.zeros(len(V))
 
@@ -64,8 +66,8 @@ for i in range(len(V)):
     [dVdt[i], dfpadt[i], dhdt[i], dxdt[i]] = StateUpdate([V[i], fpa[i], h[i], x[i]], t, g, m, gamma, x_lst, y_lst, alpha0, S)
     M[i] = V[i] / Get_SoundSpeed(h[i])
     q[i] = getStagHeatFlux(h[i], M[i], gamma, Pr, R0hs)
-    L[i] = Get_Lift(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
-    D[i] = Get_Drag(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
+    L[i], Cl[i] = Get_Lift(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
+    D[i], Cd[i] = Get_Drag(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
     Ct[i] = Get_Tangential(V[i], h[i], gamma, x_lst, y_lst, alpha0)
     Cn[i] = Get_Normal(V[i], h[i], gamma, x_lst, y_lst, alpha0)
 
@@ -90,6 +92,8 @@ dxdt = dxdt[0:len(M)]
 
 D = D[0:len(M)]
 L = L[0:len(M)]
+Cd = Cd[0:len(M)]
+Cl = Cl[0:len(M)]
 
 Ct = Ct[0:len(M)]
 Cn = Cn[0:len(M)]
