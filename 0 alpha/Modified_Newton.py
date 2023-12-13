@@ -92,17 +92,6 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
     L = 1/2 * Ct * Get_Density(h) * V**2 * S
     return L
 
-# from heatshieldpoints import generate_heatshield_points
-#
-# # Spacecraft parameters (temp values)
-# dhs = 3.9116  # heatshield diameter (m)
-# hhs = 0.635  # heatshield height (m)
-# S = np.pi * (dhs / 2) ** 2
-#
-#
-# x_lst, y_lst = generate_heatshield_points(dhs, hhs)
-# print(Get_Lift(10000, 100000, 1.4, x_lst, y_lst, S))
-
 
 def Get_length(x_lst: list, y_lst: list):
     x,y = Get_MidPoints(x_lst, y_lst)
