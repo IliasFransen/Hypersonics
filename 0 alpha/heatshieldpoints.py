@@ -1,16 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def generate_heatshield_points(radius_of_curvature, diameter, height, num_points=20):
+def generate_heatshield_points(D, H, num_points=101):
     # Parametric equations for an ellipse
-    theta = np.linspace(0, 2*np.pi, num_points)
-    x = diameter/2 * np.cos(theta)
-    y = height/2 * np.sin(theta)
-
+    R = D / 2
+    np.linspace(-R, R, num_points)
+    th = np.linspace(np.pi, 2 * np.pi, num_points)
+    x = R * np.cos(th)
+    y = H * np.sin(th)
     # Apply curvature to the points
-    x_curved = x + radius_of_curvature - diameter/2
-    x,y = x_curved[y <= 0], y[y <= 0]
     return x, y
+
 """
 def plot_apollo_heatshield(x, y):
      plt.scatter(x, y)

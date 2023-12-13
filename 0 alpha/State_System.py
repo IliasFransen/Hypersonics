@@ -1,46 +1,27 @@
 import numpy as np
-from Modified_Newton import Get_Drag, Get_Lift, Get_Tangential, Get_Normal
+from Modified_Newton import Get_Drag, Get_Lift
 from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed, Get_Temperature
 from scipy.integrate import simpson
 
 
 # StateUpdate is gives the system of differential equations that needs to be S
 
-def StateUpdate(states: list, t: list, g: float, m: float, alpha: float, gamma: float, x_lst: list, y_lst: list):
-    V, fpa, h = states
-    
-    r = 6378 * 1000 + h
+def StateUpdate(states: list, t: list, g: float, m: float, gamma: float, x_lst: list, y_lst: list, S):
+    V, fpa, h, x = states
 
-    N = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    T = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    Re = 6378 * 1000
+    r = Re + h
+    g = g * (Re/r)**2
 
-    L = Get_Lift(N, T, V, h, alpha, x_lst, y_lst)
-    D = Get_Drag(N, T, V, h, alpha, x_lst, y_lst)
-    
-    """
-    dVdt = -D / m - g * np.sin(fpa)
-    dfpadt = L / (V * m) - (g / V - V / r) * np.cos(fpa)
-    dhdt = V*np.sin(fpa)
-    """
-    
-    B = 372 # Ballistic coeff.
-    rho = Get_Density(h)
+    D = Get_Drag(V, h, gamma, x_lst, y_lst, S)
+    L = Get_Lift(V, h, gamma, x_lst, y_lst, S)
 
-    dVdt = -rho * V**2 / (2 * B)
-    dfpadt = -rho * V * L/D / (2 * B) + g * np.cos(fpa) / V - V * np.cos(fpa) / r
-    dhdt = -V * np.sin(fpa)
-    
-    return [dVdt, dfpadt, dhdt]
+    dVdt = -D / m + g * np.sin(fpa)
+    dfpadt = -L / (V * m) + (g / V - V / r) * np.cos(fpa)
+    dhdt = -V*np.sin(fpa)
+    dxdt = V*np.cos(fpa)
 
-# Get_VInit gives intial velocities, fpa must be measured from POSITIVE X AXIS
-
-def Get_VInit(V0: float, fpa0: float):
-    V0 = abs(V0)
-
-    Vx0 = V0 * np.cos(fpa0)
-    Vy0 = V0 * np.sin(fpa0)
-
-    return Vx0, Vy0
+    return [dVdt, dfpadt, dhdt, dxdt]
 
 def getViscosity(T : float):
 
