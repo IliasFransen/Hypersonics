@@ -52,12 +52,16 @@ dxdt = np.zeros(len(V))
 M = np.zeros(len(V))
 q = np.zeros(len(V))
 Q = np.zeros(len(V))
-
+L = np.zeros(len(V))
+D = np.zeros(len(V))
 
 for i in range(len(V)):
     [dVdt[i], dfpadt[i], dhdt[i], dxdt[i]] = StateUpdate([V[i], fpa[i], h[i], x[i]], t, g, m, gamma, x_lst, y_lst, S)
     M[i] = V[i] / Get_SoundSpeed(h[i])
     q[i] = getStagHeatFlux(h[i], M[i], gamma, Pr, R0hs)
+    L[i] = Get_Lift(V[i], h[i], gamma, x_lst, y_lst, S)
+    D[i] = Get_Drag(V[i], h[i], gamma, x_lst, y_lst, S)
+
     if M[i] < 3:
         break
 
@@ -76,6 +80,9 @@ dVdt = dVdt[0:len(M)]
 dfpadt = dfpadt[0:len(M)]
 dhdt = dhdt[0:len(M)]
 dxdt = dxdt[0:len(M)]
+
+D = D[0:len(M)]
+L = L[0:len(M)]
 
 q = q[0:len(M)]
 

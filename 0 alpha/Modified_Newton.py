@@ -47,7 +47,6 @@ def Get_Sin2Int(x_lst: list, y_lst: list):
 
     return integral
 
-
 # Get_CpMax gives the cpmax from modified newtonian theory
 
 def Get_CpMax(V: float, h: float, gamma: float):
@@ -62,9 +61,6 @@ def Get_CpMax(V: float, h: float, gamma: float):
     Cp_max = 2 / (gamma * M_inf ** 2) * (part1 * part2 - 1)
 
     return Cp_max
-
-
-# Get_Normal gives the normal force working on the SC
 
 def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
 
@@ -90,11 +86,23 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
-    c = y_lst[-1] - y_lst[0]
+    c = max(y_lst) - min(y_lst)
     Ct = (integral_right - integral_left) / c
 
     L = 1/2 * Ct * Get_Density(h) * V**2 * S
     return L
+
+# from heatshieldpoints import generate_heatshield_points
+#
+# # Spacecraft parameters (temp values)
+# dhs = 3.9116  # heatshield diameter (m)
+# hhs = 0.635  # heatshield height (m)
+# S = np.pi * (dhs / 2) ** 2
+#
+#
+# x_lst, y_lst = generate_heatshield_points(dhs, hhs)
+# print(Get_Lift(10000, 100000, 1.4, x_lst, y_lst, S))
+
 
 def Get_length(x_lst: list, y_lst: list):
     x,y = Get_MidPoints(x_lst, y_lst)
