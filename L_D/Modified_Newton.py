@@ -19,7 +19,7 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
 
-        if i + 1 > len(x_lst) / 2:
+        if i + 1 < len(x_lst) / 2:
             theta_temp = np.arctan(abs(slope)) - alpha
         else:
             theta_temp = np.arctan(abs(slope)) + alpha
@@ -76,11 +76,15 @@ def Get_Normal_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alp
     Cp_max = Get_CpMax(V, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
-    Cn = Cp_max * sin2th
+    Cn = Cp_max * sin2th 
 
+<<<<<<< Updated upstream
     N = 0.5 * Cn * Get_Density(h) * V**2 * np.pi * 3.9116/2
 
     return Cn
+=======
+    return Cn/3.9166
+>>>>>>> Stashed changes
 
 
 def Get_Tangential_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
@@ -93,12 +97,20 @@ def Get_Tangential_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list,
 
     integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
 
+    print(integral_left)
+
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
+<<<<<<< Updated upstream
     c = max(y_lst) - min(y_lst)
 
     Ct = (integral_right - integral_left) / c
     return Ct
+=======
+    print(integral_right)
+
+    return (integral_right - integral_left) / 2
+>>>>>>> Stashed changes
 
 
 def Get_Lift(N: float, T: float, V: float, h: float, alpha: float, x_lst: list, y_lst: list):
@@ -147,6 +159,7 @@ def Get_CLCD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: 
 
     l = Get_length(x_lst, y_lst)
 
+<<<<<<< Updated upstream
     CL = CLx / l
     CD = CDx / l
 
@@ -157,3 +170,14 @@ def Get_LD(CL: float, CD: float, V, h, S):
     L = 1 / 2 * CL * Get_Density(h) * V ** 2 * S
     D = 1 / 2 * CD * Get_Density(h) * V ** 2 * S
     return L, D
+=======
+    #CL = 2*L/(Get_Density(h)*(V**2)*S)
+    #CD = 2*D/(Get_Density(h)*(V**2)*S)
+    
+    L = q * CL * np.pi/4 * 3.9116**2 
+    D = q * CD * np.pi/4 * 3.9116**2 
+    
+    return L, D
+
+print(Get_Tangential(1020,1,1.4,[-2,-1,0,1,2],[2,1,0,1,2],np.radians(20)))
+>>>>>>> Stashed changes
