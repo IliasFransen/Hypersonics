@@ -43,6 +43,9 @@ def Get_MidPoints(x_lst: list, y_lst: list):  # Get_MidPoints computes the x and
 
 # Get_Sin2Int gives the integral of sin^2 of these angles
 
+"for now 2D, might just be multiplying with pi to get 3D, not sure"
+
+
 def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
     theta = Get_Theta(x_lst, y_lst, alpha)
 
@@ -72,22 +75,18 @@ def Get_CpMax(V: float, h: float, gamma: float):
 
 # Get_Normal gives the normal force working on the SC
 
-def Get_Normal_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+
     Cp_max = Get_CpMax(V, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     Cn = Cp_max * sin2th 
 
-<<<<<<< Updated upstream
-    N = 0.5 * Cn * Get_Density(h) * V**2 * np.pi * 3.9116/2
-
-    return Cn
-=======
     return Cn/3.9166
->>>>>>> Stashed changes
 
 
-def Get_Tangential_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+
     CP_max = Get_CpMax(V, h, gamma)
     theta = Get_Theta(x_lst, y_lst, alpha)
 
@@ -97,87 +96,36 @@ def Get_Tangential_C(V: float, h: float, gamma: float, x_lst: list, y_lst: list,
 
     integral_left = simpson(np.flip(Cp_local[:len(Cp_local) // 2]), np.flip(y[:len(Cp_local) // 2]))
 
-    print(integral_left)
-
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
-<<<<<<< Updated upstream
-    c = max(y_lst) - min(y_lst)
 
-    Ct = (integral_right - integral_left) / c
-    return Ct
-=======
-    print(integral_right)
-
-    return (integral_right - integral_left) / 2
->>>>>>> Stashed changes
+    return (integral_right - integral_left) / 0.635
 
 
-def Get_Lift(N: float, T: float, V: float, h: float, alpha: float, x_lst: list, y_lst: list):
-    L = -N*np.sin(alpha) + T*np.cos(alpha)
-    #L = -T * np.cos(np.pi - alpha) - N * np.sin(np.pi - alpha)
-    #Cpmax = Get_CpMax(V, h, 1.4)
-    #sin2int = Get_Sin2Int(x_lst, y_lst, alpha)
-    #CL = Cpmax * sin2int * np.cos(alpha)
-    #L = 0.5 * CL * Get_Density(h) * V**2
-    #Cl = 2 * np.sin(np.pi - alpha)**2 * np.cos(np.pi - alpha)
-    #L = 0.5 * Get_Density(h) * V**2 * Cl * 12
-    return L
+def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+ 
+    CN = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
+    CT = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+
+    CL = -CN*np.sin(alpha) + CT*np.cos(alpha)
+ 
+    return CL
 
 
-def Get_Drag(N: float, T: float, V : float, h : float, alpha: float, x_lst : list, y_lst : list):
-    D = N * np.cos(alpha) + T * np.sin(alpha)
-    #D = T * np.sin(np.pi - alpha) - N * np.cos(np.pi - alpha)
-    #Cpmax = Get_CpMax(V, h, 1.4)
-    #sin2int = Get_Sin2Int(x_lst, y_lst, alpha)
-    #CD = Cpmax * sin2int * np.sin(alpha)
-    #D = 0.5 * CD * Get_Density(h) * V**2
-    #Cd = 2 * np.sin(np.pi - alpha)**3
-    #D = 0.5 * Get_Density(h) * V**2 * Cd * 12
+def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+
+    CN = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
+    CT = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)    
+
+    CD = CN * np.cos(alpha) + CT * np.sin(alpha)
+
     return D
 
-def Get_length(x_lst: list, y_lst: list):
-    x, y = Get_MidPoints(x_lst, y_lst)
 
-    lengths = np.array([])
-    for i in range(len(x)-1):
-        l = ((x[i] - x[i + 1]) ** 2 + (y[i] - y[i + 1]) ** 2) ** 0.5
-        lengths = np.append(lengths, l)
+def Get_LD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
-    middle_ind = int(np.floor(len(lengths)/2))
+    CD = Get_Drag(V, h, gamma, x_lst, y_lst, alpha)
+    CL = Get_Lift(V, h, gamma, x_lst, y_lst, alpha)
 
-    lengths = np.delete(lengths, middle_ind)
+    return CL/CD
 
-    return np.sum(lengths)
-
-def Get_CLCD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
-    CTx = Get_Tangential_C(V, h, gamma, x_lst, y_lst, alpha)
-    CNx = Get_Normal_C(V, h, gamma, x_lst, y_lst, alpha)
-
-    CLx = CNx * np.cos(alpha) - CTx * np.sin(alpha)
-    CDx = CTx * np.cos(alpha) + CNx * np.sin(alpha)
-
-    l = Get_length(x_lst, y_lst)
-
-<<<<<<< Updated upstream
-    CL = CLx / l
-    CD = CDx / l
-
-    return CL, CD
-
-
-def Get_LD(CL: float, CD: float, V, h, S):
-    L = 1 / 2 * CL * Get_Density(h) * V ** 2 * S
-    D = 1 / 2 * CD * Get_Density(h) * V ** 2 * S
-    return L, D
-=======
-    #CL = 2*L/(Get_Density(h)*(V**2)*S)
-    #CD = 2*D/(Get_Density(h)*(V**2)*S)
-    
-    L = q * CL * np.pi/4 * 3.9116**2 
-    D = q * CD * np.pi/4 * 3.9116**2 
-    
-    return L, D
-
-print(Get_Tangential(1020,1,1.4,[-2,-1,0,1,2],[2,1,0,1,2],np.radians(20)))
->>>>>>> Stashed changes
