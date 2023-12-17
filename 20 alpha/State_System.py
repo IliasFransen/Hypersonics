@@ -6,15 +6,15 @@ from scipy.integrate import simpson
 
 # StateUpdate is gives the system of differential equations that needs to be S
 
-def StateUpdate(states: list, t: list, g: float, m: float, gamma: float, x_lst: list, y_lst: list, alpha: float, S):
+def StateUpdate(states: list, t: list, g: float, m: float, gamma: float, R0: float, delta: float, alpha: float, S):
     V, fpa, h, x = states
 
     Re = 6378 * 1000
     r = Re + h
     g = g * (Re / r) ** 2
 
-    L = Get_Lift(V, h, gamma, x_lst, y_lst, alpha, S)
-    D = Get_Drag(V, h, gamma, x_lst, y_lst, alpha, S)
+    L = Get_Lift(V, h, gamma, R0, delta, alpha, S)[0]
+    D = Get_Drag(V, h, gamma, R0, delta, alpha, S)[0]
 
     dVdt = -D / m + g * np.sin(fpa)
     dfpadt = -L / (V * m) + (g / V - V / r) * np.cos(fpa)

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import simpson, trapezoid
 from Atmosphereic_Conditions import Get_SoundSpeed, Get_Density
 
-
+"""
 # x and y lists must be points specified from left to right on sideview
 # nr of points must be odd
 
@@ -25,7 +25,8 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
     return theta
 
 
-def Get_MidPoints(x_lst: list, y_lst: list):  # Get_MidPoints computes the x and y coodinate of the midpoints of each panel
+def Get_MidPoints(x_lst: list,
+                  y_lst: list):  # Get_MidPoints computes the x and y coodinate of the midpoints of each panel
 
     x_mid = np.array([])
     y_mid = np.array([])
@@ -51,6 +52,7 @@ def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
     integral = simpson(np.sin(theta) ** 2, x)
 
     return integral
+"""
 
 # Get_CpMax gives the cpmax from modified newtonian theory
 
@@ -68,6 +70,7 @@ def Get_CpMax(V: float, h: float, gamma: float):
     return Cp_max
 
 
+"""
 def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
 
     Cp_max = Get_CpMax(V, h, gamma)
@@ -77,7 +80,6 @@ def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha
     Cn = 1/b * Cp_max * sin2th
 
     return Cn
-
 
 def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
     CP_max = Get_CpMax(V, h, gamma)
@@ -114,3 +116,64 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: 
 
     L = 1/2 * Cl * Get_Density(h) * V**2 * S
     return L
+"""
+
+
+def Get_Ca(V: float, h: float, gamma: float, R0: float, delta: float, alpha: float, S: float):
+    CP_max = Get_CpMax(V, h, gamma)
+    d = delta
+    if 0 <= alpha <= d:
+        C = np.pi / 2 * (
+                    np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2)
+    elif d < alpha <= np.pi - d:
+        C1 = np.cos(alpha) * np.arccos(np.sin(d)/np.sin(alpha))
+        C2 = (np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2) * (np.pi / 2 + np.arcsin(np.tan(d)/np.tan(alpha)))
+        C3 = np.cos(alpha) * np.sin(d)/2 * (1-3*np.sin(d)**2) * np.sqrt(np.sin(alpha)**2 - np.sin(d)**2)
+        C = 1 / 2 * (C1 + C2 + C3)
+    elif np.pi - d < alpha <= np.pi:
+        C = 0
+    else:
+        print("error")
+        exit()
+    Ca = CP_max / S * R0 ** 2 * C
+    return Ca
+
+
+def Get_Cn(V: float, h: float, gamma: float, R0: float, delta: float, alpha: float, S: float):
+    CP_max = Get_CpMax(V, h, gamma)
+    d = delta
+    if 0 <= alpha <= d:
+        C = np.pi / 2 * np.cos(alpha) * np.sin(alpha) * (np.cos(d)) ** 4
+    elif d < alpha <= np.pi - d:
+        C1 = np.arccos(np.sin(d) / np.sin(alpha))
+        C2 = np.cos(alpha) * np.cos(d) ** 4 * (np.pi / 2 + np.arcsin(np.tan(d) / np.tan(alpha)))
+        C3 = np.sin(d) / 3 * np.sqrt(np.sin(alpha) ** 2 - np.sin(d) ** 2) * (
+                np.sin(d) ** 2 * (3 - 1 / np.sin(alpha) ** 2) - 5)
+        C = np.sin(alpha) / 2 * (C1 + C2 + C3)
+    elif np.pi - d < alpha <= np.pi:
+        C = 0
+    else:
+        print("error")
+        exit()
+    Cn = CP_max / S * R0 ** 2 * C
+    return Cn
+
+
+def Get_Drag(V: float, h: float, gamma: float, R0: float, delta: float, alpha: float, S):
+    Cn = Get_Cn(V, h, gamma, R0, delta, alpha, S)
+    Ca = Get_Ca(V, h, gamma, R0, delta, alpha, S)
+
+    Cd = Cn*np.sin(alpha)+Ca*np.cos(alpha)
+
+    D = 1/2 * Cd * Get_Density(h) * V**2 * S
+    return D, Cd
+
+
+def Get_Lift(V: float, h: float, gamma: float, R0: float, delta: float, alpha: float, S):
+    Cn = Get_Cn(V, h, gamma, R0, delta, alpha, S)
+    Ca = Get_Ca(V, h, gamma, R0, delta, alpha, S)
+
+    Cl = Cn * np.cos(alpha) - Ca * np.sin(alpha)
+
+    L = 1/2 * Cl * Get_Density(h) * V**2 * S
+    return L, Cl
