@@ -54,6 +54,7 @@ def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
     return integral
 """
 
+
 # Get_CpMax gives the cpmax from modified newtonian theory
 
 def Get_CpMax(V: float, h: float, gamma: float):
@@ -124,11 +125,12 @@ def Get_Ca(V: float, h: float, gamma: float, R0: float, delta: float, alpha: flo
     d = delta
     if 0 <= alpha <= d:
         C = np.pi / 2 * (
-                    np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2)
+                np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2)
     elif d < alpha <= np.pi - d:
-        C1 = np.cos(alpha) * np.arccos(np.sin(d)/np.sin(alpha))
-        C2 = (np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2) * (np.pi / 2 + np.arcsin(np.tan(d)/np.tan(alpha)))
-        C3 = np.cos(alpha) * np.sin(d)/2 * (1-3*np.sin(d)**2) * np.sqrt(np.sin(alpha)**2 - np.sin(d)**2)
+        C1 = np.cos(alpha) * np.arccos(np.sin(d) / np.sin(alpha))
+        C2 = (np.sin(alpha) ** 2 * np.cos(d) ** 4 / 2 - np.cos(alpha) ** 2 * np.sin(d) ** 4 + np.cos(alpha) ** 2) * (
+                np.pi / 2 + np.arcsin(np.tan(d) / np.tan(alpha)))
+        C3 = np.cos(alpha) * np.sin(d) / 2 * (1 - 3 * np.sin(d) ** 2) * np.sqrt(np.sin(alpha) ** 2 - np.sin(d) ** 2)
         C = 1 / 2 * (C1 + C2 + C3)
     elif np.pi - d < alpha <= np.pi:
         C = 0
@@ -143,12 +145,12 @@ def Get_Cn(V: float, h: float, gamma: float, R0: float, delta: float, alpha: flo
     CP_max = Get_CpMax(V, h, gamma)
     d = delta
     if 0 <= alpha <= d:
-        C = np.pi / 2 * np.cos(alpha) * np.sin(alpha) * (np.cos(d)) ** 4
+        C = np.pi / 2 * np.cos(alpha) * np.sin(alpha) * np.cos(d) ** 4
     elif d < alpha <= np.pi - d:
         C1 = np.arccos(np.sin(d) / np.sin(alpha))
         C2 = np.cos(alpha) * np.cos(d) ** 4 * (np.pi / 2 + np.arcsin(np.tan(d) / np.tan(alpha)))
-        C3 = np.sin(d) / 3 * np.sqrt(np.sin(alpha) ** 2 - np.sin(d) ** 2) * (
-                np.sin(d) ** 2 * (3 - 1 / np.sin(alpha) ** 2) - 5)
+        C3 = np.sin(d) / 3 * (np.sin(d) ** 2 * (3 - 1 / np.sin(alpha) ** 2) - 5) * np.sqrt(
+            np.sin(alpha) ** 2 - np.sin(d) ** 2)
         C = np.sin(alpha) / 2 * (C1 + C2 + C3)
     elif np.pi - d < alpha <= np.pi:
         C = 0
@@ -163,9 +165,9 @@ def Get_Drag(V: float, h: float, gamma: float, R0: float, delta: float, alpha: f
     Cn = Get_Cn(V, h, gamma, R0, delta, alpha, S)
     Ca = Get_Ca(V, h, gamma, R0, delta, alpha, S)
 
-    Cd = Cn*np.sin(alpha)+Ca*np.cos(alpha)
+    Cd = Cn * np.sin(alpha) + Ca * np.cos(alpha)
 
-    D = 1/2 * Cd * Get_Density(h) * V**2 * S
+    D = 1 / 2 * Cd * Get_Density(h) * V ** 2 * S
     return D, Cd
 
 
@@ -175,5 +177,5 @@ def Get_Lift(V: float, h: float, gamma: float, R0: float, delta: float, alpha: f
 
     Cl = Cn * np.cos(alpha) - Ca * np.sin(alpha)
 
-    L = 1/2 * Cl * Get_Density(h) * V**2 * S
+    L = 1 / 2 * Cl * Get_Density(h) * V ** 2 * S
     return L, Cl

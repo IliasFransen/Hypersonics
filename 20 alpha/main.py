@@ -7,10 +7,10 @@ from heatshieldpoints import generate_heatshield_points
 from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
 
 # Spacecraft parameters (temp values)
-Rhs = 3.9116  # heatshield radius (m)
+Rhs = 1.9558  # heatshield radius (m)
 R0hs = 4.6939  # heatshield radius of curvature (m)
 delta = 33 * np.pi / 180
-S = np.pi * Rhs ** 2
+S = 39.441
 
 m = 5357  # mass [kg]
 # x_lst, y_lst = generate_heatshield_points(dhs, hhs)
@@ -23,7 +23,7 @@ fpa0 = 6.5 * np.pi / 180  # reentry angle [rad]
 V0 = 11200  # initial velocity magnitude [m/s]
 x0 = 0
 
-alpha0 = 0 * np.pi / 180  # initial AoA [rad]
+alpha0 = 20 * np.pi / 180  # initial AoA [rad]
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
@@ -101,15 +101,15 @@ plt.plot(t, h)
 plt.xlabel('t [s]')
 plt.ylabel('Altitude [m]')
 
-plt.figure(2)
-plt.plot(t, V)
-plt.xlabel('t [s]')
-plt.ylabel('Velocity [m/s]')
-
-plt.figure(3)
-plt.plot(V, h)
-plt.xlabel('V [m/s]')
-plt.ylabel('Altitude [m]')
+# plt.figure(2)
+# plt.plot(t, V)
+# plt.xlabel('t [s]')
+# plt.ylabel('Velocity [m/s]')
+#
+# plt.figure(3)
+# plt.plot(V, h)
+# plt.xlabel('V [m/s]')
+# plt.ylabel('Altitude [m]')
 
 # plt.figure(5)
 # plt.plot(q, h)

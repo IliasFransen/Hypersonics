@@ -70,7 +70,7 @@ def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
     b = x_lst[-1] - x_lst[0]
     Cn = 1/b * Cp_max * sin2th
     D = 1/2 * Cn * Get_Density(h) * V**2 * S
-    return D
+    return D, Cn
 
 
 def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
@@ -90,7 +90,7 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
     Ct = (integral_right - integral_left) / c
 
     L = 1/2 * Ct * Get_Density(h) * V**2 * S
-    return L
+    return L, Ct
 
 
 def Get_length(x_lst: list, y_lst: list):
