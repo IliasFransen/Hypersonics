@@ -65,17 +65,17 @@ def Get_CpMax(V: float, h: float, gamma: float):
     return Cp_max
 
 
-def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Ca(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
     Cp_max = Get_CpMax(V, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     b = abs(x_lst[-1] - x_lst[0])
-    Cn = 1 / b * Cp_max * sin2th
+    Ca = 1 / b * Cp_max * sin2th
 
-    return Cn
+    return Ca
 
 
-def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Cn(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
     CP_max = Get_CpMax(V, h, gamma)
     theta = Get_Theta(x_lst, y_lst, alpha)
 
@@ -88,26 +88,26 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
     c = max(y_lst) - min(y_lst)
-    Ct = (integral_right - integral_left) / c
+    Cn = (integral_right - integral_left) / c
 
-    return Ct
+    return Cn
 
 
 def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float, S):
-    Cn = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    Ct = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    Ca = Get_Ca(V, h, gamma, x_lst, y_lst, alpha)
+    Cn = Get_Cn(V, h, gamma, x_lst, y_lst, alpha)
 
-    Cd = Ct * np.sin(alpha) + Cn * np.cos(alpha)
+    Cd = Cn * np.sin(alpha) + Ca * np.cos(alpha)
 
     D = 1 / 2 * Cd * Get_Density(h) * V ** 2 * S
     return D, Cd
 
 
 def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float, S):
-    Cn = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    Ct = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
+    Ca = Get_Ca(V, h, gamma, x_lst, y_lst, alpha)
+    Cn = Get_Cn(V, h, gamma, x_lst, y_lst, alpha)
 
-    Cl = Ct * np.cos(alpha) - Cn * np.sin(alpha)
+    Cl = Cn * np.cos(alpha) - Ca * np.sin(alpha)
 
     L = 1 / 2 * Cl * Get_Density(h) * V ** 2 * S
     return L, Cl

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
-from Modified_Newton import Get_Lift, Get_Drag, Get_Tangential, Get_Normal
+from Modified_Newton import Get_Lift, Get_Drag, Get_Cn, Get_Ca
 from State_System import StateUpdate, getGForce, getStagHeatFlux, getStagHeatLoad
 from heatshieldpoints import generate_heatshield_points
 from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
@@ -25,7 +25,7 @@ x0 = 0
 
 ICs = [V0, fpa0, h0, x0]  # initial conditions vector
 
-alpha0 = -20 * np.pi/180  # initial AoA [rad]
+alpha0 = 10 * np.pi/180  # initial AoA [rad]
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
@@ -58,8 +58,8 @@ L = np.zeros(len(V))
 Cl = np.zeros(len(V))
 D = np.zeros(len(V))
 Cd = np.zeros(len(V))
-Ct = np.zeros(len(V))
 Cn = np.zeros(len(V))
+Ca = np.zeros(len(V))
 
 
 for i in range(len(V)):
@@ -68,8 +68,8 @@ for i in range(len(V)):
     q[i] = getStagHeatFlux(h[i], M[i], gamma, Pr, R0hs)
     L[i], Cl[i] = Get_Lift(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
     D[i], Cd[i] = Get_Drag(V[i], h[i], gamma, x_lst, y_lst, alpha0, S)
-    Ct[i] = Get_Tangential(V[i], h[i], gamma, x_lst, y_lst, alpha0)
-    Cn[i] = Get_Normal(V[i], h[i], gamma, x_lst, y_lst, alpha0)
+    Cn[i] = Get_Cn(V[i], h[i], gamma, x_lst, y_lst, alpha0)
+    Ca[i] = Get_Ca(V[i], h[i], gamma, x_lst, y_lst, alpha0)
 
     if M[i] < 3:
         break
@@ -95,8 +95,8 @@ L = L[0:len(M)]
 Cd = Cd[0:len(M)]
 Cl = Cl[0:len(M)]
 
-Ct = Ct[0:len(M)]
 Cn = Cn[0:len(M)]
+CA = Ca[0:len(M)]
 
 
 q = q[0:len(M)]
