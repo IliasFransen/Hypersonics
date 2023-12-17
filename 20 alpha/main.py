@@ -23,7 +23,7 @@ fpa0 = 6.5 * np.pi / 180  # reentry angle [rad]
 V0 = 11200  # initial velocity magnitude [m/s]
 x0 = 0
 
-alpha0 = 20 * np.pi / 180  # initial AoA [rad]
+alpha0 = 10 * np.pi / 180  # initial AoA [rad]
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats

@@ -17,7 +17,7 @@ def StateUpdate(states: list, t: list, g: float, m: float, gamma: float, R0: flo
     D = Get_Drag(V, h, gamma, R0, delta, alpha, S)[0]
 
     dVdt = -D / m + g * np.sin(fpa)
-    dfpadt = -L / (V * m) + (g / V - V / r) * np.cos(fpa)
+    dfpadt = L / (V * m) + (g / V - V / r) * np.cos(fpa)
     dhdt = -V * np.sin(fpa)
     dxdt = V * np.cos(fpa)
 
