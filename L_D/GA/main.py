@@ -26,8 +26,6 @@ x0 = 0
 
 ICs = [V0, fpa0, h0, x0]
 
-alpha0 = 10 * np.pi / 180  # initial AoA [rad]
-
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
 
@@ -46,9 +44,9 @@ alpha_0 = 20 * np.pi/180
 
 dalpha = 0.1*np.pi/180
 
-AoA0 = alpha0
-L0 = Get_Lift(V0, h0, gamma, R0hs, delta, alpha0, S)[0]
-D0 = Get_Drag(V0, h0, gamma, R0hs, delta, alpha0, S)[0]
+AoA0 = alpha_0
+L0 = Get_Lift(V0, h0, gamma, R0hs, delta, alpha_0, S)[0]
+D0 = Get_Drag(V0, h0, gamma, R0hs, delta, alpha_0, S)[0]
 M0 = V0 / Get_SoundSpeed(h0)
 q0 = getStagHeatFlux(h0, M0, gamma, Pr, R0hs)
 Q0 = getStagHeatLoad([q0], t, 0)
