@@ -12,9 +12,9 @@ def Get_Theta(x_lst: list, y_lst: list):
     theta = np.array([])
 
     for i in range(len(x_lst) - 1):
-        num = y_lst[i + 1] - y_lst[i]
-        den = x_lst[i + 1] - x_lst[i]
-        theta_temp = np.arctan2(num,den)
+
+        slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
+        theta_temp = np.arctan(abs(slope))
         theta = np.append(theta, theta_temp)
         
     return theta

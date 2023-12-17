@@ -12,16 +12,20 @@ def Get_Theta(x_lst: list, y_lst: list, alpha: float):
     theta = np.array([])
 
     for i in range(len(x_lst) - 1):
-        num = y_lst[i + 1] - y_lst[i]
-        den = x_lst[i + 1] - x_lst[i]
-        theta_temp = np.arctan2(num, den) - alpha
+
+        slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
+
+        if i + 1 > len(x_lst) / 2:
+            theta_temp = np.arctan(abs(slope)) - alpha
+        else:
+            theta_temp = np.arctan(abs(slope)) + alpha
+
         theta = np.append(theta, theta_temp)
 
     return theta
 
 
-def Get_MidPoints(x_lst: list,
-                  y_lst: list):  # Get_MidPoints computes the x and y coodinate of the midpoints of each panel
+def Get_MidPoints(x_lst: list, y_lst: list):  # Get_MidPoints computes the x and y coodinate of the midpoints of each panel
 
     x_mid = np.array([])
     y_mid = np.array([])
@@ -48,7 +52,6 @@ def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
 
     return integral
 
-
 # Get_CpMax gives the cpmax from modified newtonian theory
 
 def Get_CpMax(V: float, h: float, gamma: float):
@@ -66,11 +69,12 @@ def Get_CpMax(V: float, h: float, gamma: float):
 
 
 def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+
     Cp_max = Get_CpMax(V, h, gamma)
     sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
 
     b = abs(x_lst[-1] - x_lst[0])
-    Cn = 1 / b * Cp_max * sin2th
+    Cn = 1/b * Cp_max * sin2th
 
     return Cn
 
@@ -92,15 +96,14 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     return Ct
 
-
 def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float, S):
     Cn = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
     Ct = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
 
-    Cd = Ct * np.sin(alpha) + Cn * np.cos(alpha)
+    Cd = Ct*np.sin(alpha)+Cn*np.cos(alpha)
 
-    D = 1 / 2 * Cd * Get_Density(h) * V ** 2 * S
-    return D, Cd
+    D = 1/2 * Cd * Get_Density(h) * V**2 * S
+    return D
 
 
 def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float, S):
@@ -109,5 +112,5 @@ def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: 
 
     Cl = Ct * np.cos(alpha) - Cn * np.sin(alpha)
 
-    L = 1 / 2 * Cl * Get_Density(h) * V ** 2 * S
-    return L, Cl
+    L = 1/2 * Cl * Get_Density(h) * V**2 * S
+    return L
