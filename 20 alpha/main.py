@@ -10,7 +10,7 @@ from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
 Rhs = 1.9558  # heatshield radius (m)
 R0hs = 4.6939  # heatshield radius of curvature (m)
 delta = 33 * np.pi / 180
-S = 39.441
+S = np.pi*Rhs**2
 
 m = 5357  # mass [kg]
 # x_lst, y_lst = generate_heatshield_points(dhs, hhs)
