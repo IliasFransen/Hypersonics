@@ -1,9 +1,5 @@
-from tkinter import N
 import numpy as np
 from scipy.integrate import simpson, trapezoid
-import csv
-
-from scipy.integrate._ivp.radau import C
 from Atmosphereic_Conditions import Get_SoundSpeed, Get_Density
 
 
@@ -12,18 +8,13 @@ from Atmosphereic_Conditions import Get_SoundSpeed, Get_Density
 
 # Get_Theta gives the local incidence angle at each panel on the surface
 
-def Get_Theta(x_lst: list, y_lst: list, alpha: float):
+def Get_Theta(x_lst: list, y_lst: list):
     theta = np.array([])
 
     for i in range(len(x_lst) - 1):
 
         slope = (y_lst[i + 1] - y_lst[i]) / (x_lst[i + 1] - x_lst[i])
-
-        if i + 1 < len(x_lst) / 2:
-            theta_temp = np.arctan(abs(slope)) - alpha
-        else:
-            theta_temp = np.arctan(abs(slope)) + alpha
-        
+        theta_temp = np.arctan(abs(slope))
         theta = np.append(theta, theta_temp)
         
     return theta
@@ -46,8 +37,8 @@ def Get_MidPoints(x_lst: list, y_lst: list):  # Get_MidPoints computes the x and
 "for now 2D, might just be multiplying with pi to get 3D, not sure"
 
 
-def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
-    theta = Get_Theta(x_lst, y_lst, alpha)
+def Get_Sin2Int(x_lst: list, y_lst: list):
+    theta = Get_Theta(x_lst, y_lst)
 
     x = Get_MidPoints(x_lst, y_lst)[0]
 
@@ -55,7 +46,6 @@ def Get_Sin2Int(x_lst: list, y_lst: list, alpha: float):
     integral = simpson(np.sin(theta) ** 2, x)
 
     return integral
-
 
 # Get_CpMax gives the cpmax from modified newtonian theory
 
@@ -72,23 +62,21 @@ def Get_CpMax(V: float, h: float, gamma: float):
 
     return Cp_max
 
-
-# Get_Normal gives the normal force working on the SC
-
-def Get_Normal(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
 
     Cp_max = Get_CpMax(V, h, gamma)
-    sin2th = Get_Sin2Int(x_lst, y_lst, alpha)
+    sin2th = Get_Sin2Int(x_lst, y_lst)
 
-    Cn = Cp_max * sin2th 
+    b = x_lst[-1] - x_lst[0]
+    Cn = 1/b * Cp_max * sin2th
+    D = 1/2 * Cn * Get_Density(h) * V**2 * S
+    return D, Cn
 
-    return Cn/3.9166
 
-
-def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, S):
 
     CP_max = Get_CpMax(V, h, gamma)
-    theta = Get_Theta(x_lst, y_lst, alpha)
+    theta = Get_Theta(x_lst, y_lst)
 
     y = Get_MidPoints(x_lst, y_lst)[1]
 
@@ -98,34 +86,22 @@ def Get_Tangential(V: float, h: float, gamma: float, x_lst: list, y_lst: list, a
 
     integral_right = simpson(Cp_local[len(Cp_local) // 2:], y[len(Cp_local) // 2:])
 
+    c = max(y_lst) - min(y_lst)
+    Ct = (integral_right - integral_left) / c
 
-    return (integral_right - integral_left) / 0.635
-
-
-def Get_Lift(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
- 
-    CN = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    CT = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)
-
-    CL = -CN*np.sin(alpha) + CT*np.cos(alpha)
- 
-    return CL
+    L = 1/2 * Ct * Get_Density(h) * V**2 * S
+    return L, Ct
 
 
-def Get_Drag(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
+def Get_length(x_lst: list, y_lst: list):
+    x,y = Get_MidPoints(x_lst, y_lst)
 
-    CN = Get_Normal(V, h, gamma, x_lst, y_lst, alpha)
-    CT = Get_Tangential(V, h, gamma, x_lst, y_lst, alpha)    
+    lengths = np.array([])
+    for i in range(len(x)-1):
+        leng = ((x[i]-x[i+1])**2 + (y[i]-y[i+1])**2)**0.5
+        lengths = np.append(lengths,leng)
 
-    CD = CN * np.cos(alpha) + CT * np.sin(alpha)
+    middle_ind = int(np.floor(len(lengths)/2))
+    lengths = np.delete(lengths,middle_ind)
 
-    return D
-
-
-def Get_LD(V: float, h: float, gamma: float, x_lst: list, y_lst: list, alpha: float):
-
-    CD = Get_Drag(V, h, gamma, x_lst, y_lst, alpha)
-    CL = Get_Lift(V, h, gamma, x_lst, y_lst, alpha)
-
-    return CL/CD
-
+    return np.sum(lengths)

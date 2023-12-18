@@ -1,146 +1,135 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GeneticAlgorithm import GeneticAlgorithmOptimization
-from State_System import Get_VInit
-from scipy.integrate import simpson
+from GlobalGeneticAlgorithm import GlobalGeneticAlgorithmOptimization
+from Modified_Newton import Get_LD
+from State_System import getGForce, getStagHeatFlux, getStagHeatLoad
 from heatshieldpoints import generate_heatshield_points
+from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
 
 # Spacecraft parameters (temp values)
 dhs = 3.9116  # heatshield diameter (m)
-R0hs = 4.69392  # heatshield radius of curvature
+# R0hs = 4.69392  # heatshield radius of curvature
 hhs = 0.635  # heatshield height (m)
+R0hs = (dhs/2)**2/hhs
+S = np.pi*(dhs/2)**2
 
-m = 5357 / np.pi  # mass [kg]
+m = 5357  # mass [kg]
 # x_lst = np.arange(-2, 2.1, 0.1) # x coords
 # y_lst = [(x/5)**2 for x in x_lst] # y coords
-x_lst, y_lst = generate_heatshield_points(R0hs, dhs, hhs)
+x_lst, y_lst = generate_heatshield_points(dhs, hhs)
 
-sc_params = [R0hs, m, x_lst, y_lst]
+
+sc_params = [R0hs, m, x_lst, y_lst, S]
 
 # ICs (temps values)
+V0 = 11000  # initial velocity magnitude [m/s]
+fpa0 = -6.5 * np.pi/180 # reentry angle [rad]
 h0 = 120000  # initial altitude [m]
-fpa0 = 6.5 * np.pi/180 + np.pi  # reentry angle [rad]
-V0 = 11200  # initial velocity magnitude [m/s]
+x0 = 0
 
-ICs = [V0, fpa0, h0]  # initial conditions vector
+ICs = [V0, fpa0, h0, x0]  # initial conditions vector
 
-# control var
+alpha0 = 0 * np.pi/180 # initial AoA [rad]
 
-alpha = 0  # AoA [rad], to be optimized
+alpha_min = -5 * np.pi/180
+alpha_max = 5 * np.pi/180
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
 
-atm_params = [g, gamma]
+Pr = 0.74 # Prandtl number
+
+atm_params = [g, gamma, Pr]
 
 if __name__ == "__main__":
     
-    GA = GeneticAlgorithmOptimization()
+    GA = GlobalGeneticAlgorithmOptimization()
+
+    dt = 1
+    t = np.arange(0, 1500, dt)
     
-    t = np.linspace(0, 500, 101)
-    q = np.zeros(len(t))
-    Q = np.zeros(len(t))
-    L = np.zeros(len(t))
-    D = np.zeros(len(t))
-    ng = np.zeros(len(t))
-    AOA = np.zeros(len(t))
+    dalpha = 0.1 * np.pi / 180 * dt
+
+    # solve t = 0 stuff
+
+    AoA0 = alpha0
+    L0, D0 = Get_LD(V0, h0, gamma, x_lst, y_lst, alpha0)
+    M0 = V0 / Get_SoundSpeed(h0)
+    q0 = getStagHeatFlux(h0, M0, gamma, Pr, R0hs)
+    Q0 = getStagHeatLoad([q0], t, 0)
+    ng0 = getGForce(0, g)
     
     x = [ICs]
 
-    for i in range(0, len(t) - 1):
-        
-        print(t[i])
-        t1 = t[i]
-        t2 = t[i+1]
-        tspan = [t1, t2]
+    opt = GA.getSolution(x, atm_params, sc_params, t, alpha_min, alpha_max, dalpha)
 
-        opt, sol = GA.getSolution(x, atm_params, sc_params, tspan)  # run genetic algorithm to get optimum
-        
-        AOA[i] = opt[0]
-        alpha = opt[0]
-        L[i] = opt[1]
-        D[i] = opt[2]
-        q[i] = opt[3]
-        ng[i] = opt[4]
-        
-        Q[i] = simpson(q[0:i + 1], t[0:i + 1])
+    AoA = opt[0]; AoA.insert(0, AoA0); AoA = np.array(AoA)
+    L = opt[1]; L[0] = L0
+    D = opt[2]; D[0] = D0
+    q = opt[3]; q[0] = q0
+    ng = opt[4]; ng[0] = ng0
+    Q = opt[5]; Q[0] = Q0
+    V = opt[6]; V[0] = V0
+    h = opt[7]; h[0] = h0
+    M = opt[8]; M[0] = M0
 
-        x.append([sol[-1, 0], sol[-1, 1], sol[-1, 2]])
-
-        # Parachute height = 8 km, exit loop if h < 8 km
-        if sol[-1, 2] < 8000:
-            t = t[0:i + 1]
-            q = q[0:i + 1]
-            L = L[0:i + 1]
-            D = D[0:i + 1]
-            Q = Q[0:i + 1]
-            ng = ng[0:i + 1]
-            AOA = AOA[0:i + 1]
-
-            break
-        
-    x = list(zip(*x))
-
-    V = x[0]
-    fpa = x[1]
-    h = x[2]
-
-    Vx = np.multiply(V, np.cos(fpa))
-    Vy = np.multiply(V, np.sin(fpa))
-    # if len(h) == len(t)+1:
-    #     V = V[0:-1]
-    #     fpa = fpa[0:-1]
-    #     h = h[0:-1]
+    t = t[0:len(ng)]
+    AoA = AoA[0:len(t)]
 
     plt.figure(1)
     plt.plot(t, h)
     plt.xlabel('t [s]')
     plt.ylabel('Altitude [m]')
-    plt.tight_layout()
 
     plt.figure(2)
     plt.plot(t, V)
     plt.xlabel('t [s]')
     plt.ylabel('Velocity [m/s]')
-    plt.tight_layout()
 
     plt.figure(3)
-    plt.plot(t, Vy)
-    plt.xlabel('t [s]')
-    plt.ylabel('Velocity y [m/s]')
-    plt.tight_layout()
-
-    plt.figure(4)
-    plt.plot(t, Vx)
-    plt.xlabel('t [s]')
-    plt.ylabel('Velocity x [m/s]')
-    plt.tight_layout()
-
-    plt.figure(5)
     plt.plot(t, np.gradient(V, t))
     plt.xlabel('t [s]')
     plt.ylabel('Grad(Velocity)=a [m/s^2]')
-    plt.tight_layout()
 
-    plt.figure(6)
+    plt.figure(4)
     plt.plot(V, h)
     plt.xlabel('V [m/s]')
     plt.ylabel('Altitude [m]')
-    plt.tight_layout()
+    
+    plt.figure(5)
+    plt.plot(q, h)
+    plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
+    plt.ylabel('Altitude [m]')
+    
+    plt.figure(6)
+    plt.plot(Q, h)
+    plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
+    plt.ylabel('Altitude [m]')
+    
+    plt.figure(7)
+    plt.plot(ng, h)
+    plt.xlabel('Deceleration Load [g]')
+    plt.ylabel('Altitude [m]')
+    
+    plt.figure(8)
+    plt.plot(t, ng)
+    plt.xlabel('t [s]')
+    plt.ylabel('Deceleration Load [g]')
+    
+    plt.figure(9)
+    plt.plot(M, L/D)
+    plt.xlabel('Mach Number')
+    plt.ylabel(r'$\frac{L}{D}$')
+    
+    plt.figure(10)
+    plt.plot(t, AoA * 180/np.pi)
+    plt.ylim([-10, 10])
+    plt.xlabel('t [s]')
+    plt.ylabel(r'$\alpha$ [deg]')
 
-    # plt.figure(5)
-    # plt.plot(q, h)
-    # plt.xlabel(r'Stagnation point heat flux [W/m$^2$]')
-    # plt.ylabel('Altitude [m]')
-    #
-    # plt.figure(6)
-    # plt.plot(Q, h)
-    # plt.xlabel(r'Stagnation point heat load [J/m$^2$]')
-    # plt.ylabel('Altitude [m]')
-    #
-    # plt.figure(7)
-    # plt.plot(ng, h)
-    # plt.xlabel('Deceleration Load [g]')
-    # plt.ylabel('Altitude [m]')
+    plt.figure(11)
+    plt.plot(t, np.gradient(AoA * 180/np.pi))
+    plt.xlabel('t [s]')
+    plt.ylabel(r'$\frac{d\alpha}{dt}$ [deg/s]')
 
     plt.show()
