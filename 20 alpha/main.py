@@ -11,6 +11,7 @@ Rhs = 1.9558  # heatshield radius (m)
 R0hs = 4.6939  # heatshield radius of curvature (m)
 delta = 33 * np.pi / 180
 S = np.pi*Rhs**2
+Aref = np.pi*R0hs**2
 
 m = 5357  # mass [kg]
 # x_lst, y_lst = generate_heatshield_points(dhs, hhs)
@@ -23,7 +24,7 @@ fpa0 = 6.5 * np.pi / 180  # reentry angle [rad]
 V0 = 11200  # initial velocity magnitude [m/s]
 x0 = 0
 
-alpha0 = 10 * np.pi / 180  # initial AoA [rad]
+alpha0 = 20 * np.pi / 180  # initial AoA [rad]
 
 g = 9.80665  # acceleration due to gravity [m/s^2]
 gamma = 1.4  # ratio of specific heats
@@ -33,7 +34,7 @@ Pr = 0.74  # Prandtl number
 atm_params = [g, gamma, Pr]
 
 dt = 1
-t = np.arange(0, 270, dt)
+t = np.arange(0, 600, dt)
 
 # solve t = 0 stuff
 
@@ -96,10 +97,10 @@ q = q[0:len(M)]
 
 t = t[0:len(M)]
 
-plt.figure(1)
-plt.plot(t, h)
-plt.xlabel('t [s]')
-plt.ylabel('Altitude [m]')
+# plt.figure(1)
+# plt.plot(t, h)
+# plt.xlabel('t [s]')
+# plt.ylabel('Altitude [m]')
 
 # plt.figure(2)
 # plt.plot(t, V)
@@ -126,9 +127,9 @@ plt.ylabel('Altitude [m]')
 # plt.xlabel('Deceleration Load [g]')
 # plt.ylabel('Altitude [m]')
 #
-# plt.figure(8)
-# plt.plot(t, ng)
-# plt.xlabel('t [s]')
-# plt.ylabel('Deceleration Load [g]')
+plt.figure(8)
+plt.plot(t, ng)
+plt.xlabel('t [s]')
+plt.ylabel('Deceleration Load [g]')
 
 plt.show()
