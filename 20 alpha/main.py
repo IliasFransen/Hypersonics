@@ -19,9 +19,9 @@ m = 5357  # mass [kg]
 sc_params = [R0hs, m, delta, S]
 
 # ICs 
-h0 = 120000  # initial altitude [m]
-fpa0 = 6.5 * np.pi / 180  # reentry angle [rad]
-V0 = 11200  # initial velocity magnitude [m/s]
+h0 = 121920  # initial altitude [m]
+fpa0 = 6.49 * np.pi / 180  # reentry angle [rad]
+V0 = 11032  # initial velocity magnitude [m/s]
 x0 = 0
 
 alpha0 = 20 * np.pi / 180  # initial AoA [rad]
@@ -102,10 +102,10 @@ t = t[0:len(M)]
 # plt.xlabel('t [s]')
 # plt.ylabel('Altitude [m]')
 
-# plt.figure(2)
-# plt.plot(t, V)
-# plt.xlabel('t [s]')
-# plt.ylabel('Velocity [m/s]')
+plt.figure(2)
+plt.plot(t, V)
+plt.xlabel('t [s]')
+plt.ylabel('Velocity [m/s]')
 #
 # plt.figure(3)
 # plt.plot(V, h)
@@ -127,9 +127,9 @@ t = t[0:len(M)]
 # plt.xlabel('Deceleration Load [g]')
 # plt.ylabel('Altitude [m]')
 #
-plt.figure(8)
-plt.plot(t, ng)
-plt.xlabel('t [s]')
-plt.ylabel('Deceleration Load [g]')
+# plt.figure(8)
+# plt.plot(t, ng)
+# plt.xlabel('t [s]')
+# plt.ylabel('Deceleration Load [g]')
 
 plt.show()
