@@ -49,15 +49,20 @@ def normalShockProperties(h: float, M: float, gamma: float):
 
 
 def getStagHeatFlux(h: float, M: float, gamma: float, Pr: float, R0: float):
+
+    k = 4.642E-4
+
     rho_inf = Get_Density(h)
 
-    rho_e, mu_e = normalShockProperties(h, M, gamma)
+    #rho_e, mu_e = normalShockProperties(h, M, gamma)
 
     a = Get_SoundSpeed(h)
 
     U_inf = M * a
 
-    q = 2 ** (-3 / 4) * 0.76 * Pr ** (-0.6) / np.sqrt(R0) * np.sqrt(rho_e ** 0.5 * rho_inf ** 0.5 * mu_e) * U_inf ** 2.5
+    #q = 2 ** (-3 / 4) * 0.76 * Pr ** (-0.6) / np.sqrt(R0) * np.sqrt(rho_e ** 0.5 * rho_inf ** 0.5 * mu_e) * U_inf ** 2.5
+
+    q = k * np.sqrt(rho_inf/R0) * U_inf**3
 
     return q
 

@@ -1,9 +1,9 @@
-from asyncio.windows_events import NULL
+#from asyncio.windows_events import NULL
 import numpy as np
 import random
 from deap import base, creator, tools
 from Atmosphereic_Conditions import Get_Density, Get_SoundSpeed
-from Modified_Newton import Get_Lift, Get_Drag
+from Modified_Newton import Get_Lift, Get_Drag, Get_Cn, Get_Ca
 from State_System import StateUpdate, getGForce, getStagHeatFlux, getStagHeatLoad
 from scipy.integrate import odeint
 
@@ -11,17 +11,17 @@ from scipy.integrate import odeint
 class GlobalGeneticAlgorithmOptimization:
     # GA setup
 
-    ngen = 1 # number of generations
-    npop = 1  # number of populations
+    ngen = 30 # number of generations
+    npop = 100  # number of populations
     eta = 10.0  # SBX crossover operator
-    mutpb = 0.01  # probability of mutation
-    cxpb = 0.5 # probability of crossover
+    mutpb = 0.9  # probability of mutation
+    cxpb = 0.9 # probability of crossover
 
     # constraints
 
-    q_max = 2.5E6 # max. stagnation point heat flux [W/m^2]
+    q_max = 3.5E6 # max. stagnation point heat flux [W/m^2]
     Q_max = 3.01E8 # max. stagnation point heat load [J/m^2]
-    ng_max = 7.0  # max. g-load [g]
+    ng_max = 9.5  # max. g-load [g]
 
     def __init__(self):
 
@@ -54,6 +54,10 @@ class GlobalGeneticAlgorithmOptimization:
         
         L = np.zeros(len(t))
         D = np.zeros(len(t))
+        CL = np.zeros(len(t))
+        CD = np.zeros(len(t))
+        CA = np.zeros(len(t))
+        CN = np.zeros(len(t))
         ng = np.zeros(len(t))
         q = np.zeros(len(t))
         Q = np.zeros(len(t))
@@ -78,10 +82,13 @@ class GlobalGeneticAlgorithmOptimization:
 
             AoA[i] = alphas[i]
         
-            L[i] = Get_Lift(V[i], h[i], gamma, R0, delta, alphas[i], S)[0]
-            D[i] = Get_Drag(V[i], h[i], gamma, R0, delta, alphas[i], S)[0]
+            CA[i] = Get_Ca(V[i], h[i], gamma, R0, delta, alphas[i], S)
+            CN[i] = Get_Cn(V[i], h[i], gamma, R0, delta, alphas[i], S)
 
-            dVdt = StateUpdate([V[i], fpa[i], h[i], s[i]], NULL, g, m, gamma, R0, delta, alphas[i], S)[0]
+            L[i], CL[i] = Get_Lift(V[i], h[i], gamma, R0, delta, alphas[i], S)
+            D[i], CD[i] = Get_Drag(V[i], h[i], gamma, R0, delta, alphas[i], S)
+
+            dVdt = StateUpdate([V[i], fpa[i], h[i], s[i]], [t[i], t[i+1]], g, m, gamma, R0, delta, alphas[i], S)[0]
 
             a = Get_SoundSpeed(sol[-1, 2])
             M[i] = sol[-1, 0] / a   # Mach number
@@ -108,11 +115,15 @@ class GlobalGeneticAlgorithmOptimization:
                 AoA = AoA[0:i + 1]
                 M = M[0:i + 1]
                 s = s[0:i + 1]
+                CL = CL[0:i + 1]
+                CD = CD[0:i + 1]
+                CA = CA[0:i + 1]
+                CN = CN[0:i + 1]
                 self.x = [x0[0]]
                 break
             
         self.x = [x0[0]]
-        return [alphas, L, D, q, ng, Q, V, h, M]
+        return [alphas, L, D, q, ng, Q, V, h, M, s, CL, CD, CA, CN]
 
     def getSolution(self, x, atm_params, sc_params, t, alpha_min, alpha_max, dalpha):
 
